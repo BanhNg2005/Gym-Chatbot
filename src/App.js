@@ -140,7 +140,7 @@ const HomePage = () => {
             <div
                 className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300`}>
               <img
-                  src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+                  src={require('./home.jpg')}
                   alt="Workout" className="w-full h-56 object-cover"/>
               <div className="p-6">
                 <h3 className="text-2xl font-semibold mb-3">Effective Workouts</h3>
