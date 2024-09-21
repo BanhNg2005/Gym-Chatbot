@@ -1,13 +1,12 @@
+// App.js
 import React, { useState } from "react";
-import { FaInstagram } from "react-icons/fa";
-import { FaFacebook } from "react-icons/fa";
-import { FaGithub } from "react-icons/fa";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { FaInstagram, FaFacebook, FaGithub, FaSignInAlt, FaMoon, FaSun } from "react-icons/fa";
 import { IoMdFitness, IoMdNutrition } from "react-icons/io";
 import { FaBed } from "react-icons/fa";
 import { GiAchievement } from "react-icons/gi";
 import { FiSend, FiMenu } from "react-icons/fi";
-import { FaSignInAlt } from "react-icons/fa";
-import { FaMoon, FaSun } from "react-icons/fa";
+import SignUpForm from "./components/signup";
 import './index.css';
 
 const HomePage = () => {
@@ -63,10 +62,12 @@ const HomePage = () => {
               <li><a href="#" className={`hover:text-blue-400 flex items-center ${isDarkMode ? 'text-white' : 'text-gray-900'}`}><FaBed className="mr-1" /> Sleep</a></li>
               <li><a href="#" className={`hover:text-blue-400 flex items-center ${isDarkMode ? 'text-white' : 'text-gray-900'}`}><GiAchievement className="mr-1" /> Achievement</a></li>
             </ul>
-            <button className="mt-4 md:mt-0 ml-4 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition duration-300 flex items-center">
-              <FaSignInAlt className="mr-2" />
-              Sign In
-            </button>
+            <Link to="/signup">
+              <button className="mt-4 md:mt-0 ml-4 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition duration-300 flex items-center">
+                <FaSignInAlt className="mr-2" />
+                Sign In
+              </button>
+            </Link>
             <button
               onClick={toggleDarkMode}
               className="ml-4 p-2 rounded-full focus:outline-none transition-colors duration-200 ease-in-out"
@@ -110,21 +111,21 @@ const HomePage = () => {
           <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} p-6 rounded-lg shadow-lg max-w-2xl mx-auto`}>
             <div className={`h-80 overflow-y-auto mb-4 p-4 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'} rounded-lg`}>
               {chatHistory.map((chat, index) => (
-                  <div key={index} className={`mb-4 ${chat.type === "user" ? "text-right" : "text-left"}`}>
+                <div key={index} className={`mb-4 ${chat.type === "user" ? "text-right" : "text-left"}`}>
                   <span
-                      className={`inline-block p-3 rounded-lg ${chat.type === "user" ? "bg-blue-600 text-white" : isDarkMode ? "bg-gray-600 text-white" : "bg-gray-300 text-gray-900"}`}>
+                    className={`inline-block p-3 rounded-lg ${chat.type === "user" ? "bg-blue-600 text-white" : isDarkMode ? "bg-gray-600 text-white" : "bg-gray-300 text-gray-900"}`}>
                     {chat.message}
                   </span>
-                  </div>
+                </div>
               ))}
             </div>
             <form onSubmit={handleChatSubmit} className="flex">
               <input
-                  type="text"
-                  value={chatMessage}
-                  onChange={(e) => setChatMessage(e.target.value)}
-                  placeholder="Ask me anything about fitness..."
-                  className={`flex-grow p-3 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-600 ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'}`}
+                type="text"
+                value={chatMessage}
+                onChange={(e) => setChatMessage(e.target.value)}
+                placeholder="Ask me anything about fitness..."
+                className={`flex-grow p-3 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-600 ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'}`}
               />
               <button type="submit"
                       className="bg-blue-600 text-white p-3 rounded-r-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 transition duration-300">
@@ -141,7 +142,7 @@ const HomePage = () => {
                 className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300`}>
               <img
                   src={require('./home.jpg')}
-                  alt="Workout" className="w-full h-56 object-cover"/>
+                  alt="Workout" className="w-full h-56 object-cover" />
               <div className="p-6">
                 <h3 className="text-2xl font-semibold mb-3">Effective Workouts</h3>
                 <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>Discover our curated workout
@@ -180,11 +181,10 @@ const HomePage = () => {
                 className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300`}>
               <img
                   src={require('./achievement.jpg')}
-                  alt="Sleep" className="w-full h-56 object-cover"/>
+                  alt="Achievement" className="w-full h-56 object-cover"/>
               <div className="p-6">
-                <h3 className="text-2xl font-semibold mb-3">Quality Sleep</h3>
-                <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>Understand the importance of
-                  sleep in your fitness routine and learn techniques for better rest and recovery.</p>
+                <h3 className="text-2xl font-semibold mb-3">Remarkable Achievements</h3>
+                <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>Celebrate your fitness milestones and get inspired by others' success stories.</p>
                 <a href="#" className="text-blue-400 font-semibold hover:text-blue-300 transition duration-200">Learn
                   More →</a>
               </div>
@@ -204,15 +204,15 @@ const HomePage = () => {
               <span className="text-lg">Follow us:</span>
               <a href="https://www.instagram.com/banh_ng05/?hl=en" target="_blank" rel="noopener noreferrer"
                  className="text-blue-400 hover:text-blue-300 transition duration-300">
-                <FaInstagram size={28}/>
+                <FaInstagram size={28} />
               </a>
               <a href="https://www.facebook.com/nguyen.banh.9" target="_blank" rel="noopener noreferrer"
                  className="text-blue-400 hover:text-blue-300 transition duration-300">
-                <FaFacebook size={28}/>
+                <FaFacebook size={28} />
               </a>
               <a href="https://github.com/BanhNg2005" target="_blank" rel="noopener noreferrer"
                  className="text-blue-400 hover:text-blue-300 transition duration-300">
-                <FaGithub size={28}/>
+                <FaGithub size={28} />
               </a>
             </div>
           </div>
@@ -225,4 +225,15 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+const App = () => {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/signup" element={<SignUpForm />} />
+      </Routes>
+    </Router>
+  );
+};
+
+export default App;

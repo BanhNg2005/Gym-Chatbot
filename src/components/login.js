@@ -1,17 +1,17 @@
 import React, { useState } from "react";
-import { FaFacebook, FaGoogle, FaTwitter } from "react-icons/fa";
-import { motion } from "framer-motion";
+import { FaEye, FaEyeSlash, FaGoogle, FaFacebook, FaGithub } from "react-icons/fa";
 
-const AccountCreationPage = () => {
+
+const SignUpForm = () => {
   const [formData, setFormData] = useState({
     email: "",
+    phone: "",
     password: "",
-    age: "",
-    weight: "",
-    height: "",
+    confirmPassword: ""
   });
-
+  const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -20,59 +20,54 @@ const AccountCreationPage = () => {
   };
 
   const validateField = (name, value) => {
-    let newErrors = { ...errors };
-
+    let error = "";
     switch (name) {
       case "email":
-        newErrors.email = /^\S+@\S+\.\S+$/.test(value) ? "" : "Invalid email format";
+        if (!/\S+@\S+\.\S+/.test(value)) {
+          error = "Invalid email format";
+        }
+        break;
+      case "phone":
+        if (!/^\d{10}$/.test(value.replace(/\D/g, ''))) {
+          error = "Invalid phone number";
+        }
         break;
       case "password":
-        newErrors.password =
-          value.length < 8 ? "Password must be at least 8 characters long" : "";
+        if (!/^(?=.*[A-Z])(?=.*\d).{8,}$/.test(value)) {
+          error = "Password must have at least 8 characters, one uppercase letter, and one number";
+        }
         break;
-      case "age":
-        newErrors.age =
-          isNaN(value) || value < 13 || value > 120
-            ? "Age must be between 13 and 120"
-            : "";
-        break;
-      case "weight":
-        newErrors.weight =
-          isNaN(value) || value < 30 || value > 300
-            ? "Weight must be between 30 and 300 kg"
-            : "";
-        break;
-      case "height":
-        newErrors.height =
-          isNaN(value) || value < 100 || value > 250
-            ? "Height must be between 100 and 250 cm"
-            : "";
+      case "confirmPassword":
+        if (value !== formData.password) {
+          error = "Passwords do not match";
+        }
         break;
       default:
         break;
     }
-
-    setErrors(newErrors);
+    setErrors({ ...errors, [name]: error });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Submit logic here
-    console.log("Form submitted:", formData);
+    setIsSubmitted(true);
+    const formFields = ["email", "phone", "password", "confirmPassword"];
+    formFields.forEach(field => validateField(field, formData[field]));
+    
+    if (Object.values(errors).every(error => error === "")) {
+      console.log("Form submitted", formData);
+    }
+  };
+
+  const handleThirdPartySignUp = (provider) => {
+    console.log(`Signing up with ${provider}`);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0, y: -50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full"
-      >
-        <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">
-          Create Your Fitness Account
-        </h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="min-h-screen bg-gradient-to-br from-purple-100 to-blue-200 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
+        <h2 className="text-3xl text-center mb-6 text-gray-800">Sign Up</h2>
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
               Email
@@ -83,139 +78,108 @@ const AccountCreationPage = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${
-                errors.email ? "border-red-500" : ""
-              }`}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-base py-2 px-3"
+              placeholder="you@example.com"
               required
-              aria-describedby="email-error"
             />
-            {errors.email && (
-              <p id="email-error" className="mt-1 text-sm text-red-600">
-                {errors.email}
-              </p>
-            )}
+            {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+          </div>
+          <div>
+            <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+              Phone Number
+            </label>
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-base py-2 px-3"
+              placeholder="(123) 456-7890"
+              required
+            />
+            {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
           </div>
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700">
               Password
             </label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-base py-2 px-3"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
+            <p className="mt-1 text-xs text-gray-500">Must be at least 8 characters, one capital letter, and one number</p>
+            {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
+          </div>
+          <div>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+              Confirm Password
+            </label>
             <input
               type="password"
-              id="password"
-              name="password"
-              value={formData.password}
+              id="confirmPassword"
+              name="confirmPassword"
+              value={formData.confirmPassword}
               onChange={handleChange}
-              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${
-                errors.password ? "border-red-500" : ""
-              }`}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-base py-2 px-3"
               required
-              aria-describedby="password-error"
             />
-            {errors.password && (
-              <p id="password-error" className="mt-1 text-sm text-red-600">
-                {errors.password}
-              </p>
-            )}
-          </div>
-          <div>
-            <label htmlFor="age" className="block text-sm font-medium text-gray-700">
-              Age
-            </label>
-            <input
-              type="number"
-              id="age"
-              name="age"
-              value={formData.age}
-              onChange={handleChange}
-              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${
-                errors.age ? "border-red-500" : ""
-              }`}
-              required
-              aria-describedby="age-error"
-            />
-            {errors.age && (
-              <p id="age-error" className="mt-1 text-sm text-red-600">
-                {errors.age}
-              </p>
-            )}
-          </div>
-          <div>
-            <label htmlFor="weight" className="block text-sm font-medium text-gray-700">
-              Weight (kg)
-            </label>
-            <input
-              type="number"
-              id="weight"
-              name="weight"
-              value={formData.weight}
-              onChange={handleChange}
-              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${
-                errors.weight ? "border-red-500" : ""
-              }`}
-              required
-              aria-describedby="weight-error"
-            />
-            {errors.weight && (
-              <p id="weight-error" className="mt-1 text-sm text-red-600">
-                {errors.weight}
-              </p>
-            )}
-          </div>
-          <div>
-            <label htmlFor="height" className="block text-sm font-medium text-gray-700">
-              Height (cm)
-            </label>
-            <input
-              type="number"
-              id="height"
-              name="height"
-              value={formData.height}
-              onChange={handleChange}
-              className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${
-                errors.height ? "border-red-500" : ""
-              }`}
-              required
-              aria-describedby="height-error"
-            />
-            {errors.height && (
-              <p id="height-error" className="mt-1 text-sm text-red-600">
-                {errors.height}
-              </p>
-            )}
+            {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>}
           </div>
           <button
             type="submit"
-            className="w-full bg-indigo-600 text-white rounded-md py-2 px-4 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out"
+            className="w-full py-3 px-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out"
           >
-            Create Account
+            Sign Up
           </button>
         </form>
-        <div className="mt-6">
-          <p className="text-center text-sm text-gray-600">Or sign up with:</p>
-          <div className="mt-4 flex justify-center space-x-4">
+        <div className="mt-8">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">Or continue with</span>
+            </div>
+          </div>
+          <div className="mt-6 grid grid-cols-3 gap-3">
             <button
-              aria-label="Sign up with Facebook"
-              className="bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              onClick={() => handleThirdPartySignUp('Google')}
+              className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
             >
-              <FaFacebook size={20} />
+              <FaGoogle className="text-red-500" />
             </button>
             <button
-              aria-label="Sign up with Google"
-              className="bg-red-600 text-white p-2 rounded-full hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              onClick={() => handleThirdPartySignUp('Facebook')}
+              className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
             >
-              <FaGoogle size={20} />
+              <FaFacebook className="text-blue-600" />
             </button>
             <button
-              aria-label="Sign up with Twitter"
-              className="bg-blue-400 text-white p-2 rounded-full hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-300"
+              onClick={() => handleThirdPartySignUp('Github')}
+              className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
             >
-              <FaTwitter size={20} />
+              <FaGithub className="text-gray-900" />
             </button>
           </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };
 
-export default AccountCreationPage;
+export default SignUpForm;
