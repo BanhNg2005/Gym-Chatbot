@@ -91,7 +91,7 @@ const SignUpForm = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 to-blue-200 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
-        <h2 className="text-3xl text-center mb-6 text-gray-800">Sign Up</h2>
+      <h2 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-purple-400 to-blue-600 bg-clip-text text-transparent leading-tight pb-2">Sign Up</h2>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
