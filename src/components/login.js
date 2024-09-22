@@ -1,185 +1,162 @@
 import React, { useState } from "react";
-import { FaEye, FaEyeSlash, FaGoogle, FaFacebook, FaGithub } from "react-icons/fa";
+import { FaGoogle, FaFacebook, FaGithub, FaUser, FaLock } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
+import { Navigate } from "react-router-dom";
 
-
-const SignUpForm = () => {
-  const [formData, setFormData] = useState({
-    email: "",
-    phone: "",
-    password: "",
-    confirmPassword: ""
-  });
-  const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState({});
+const SignInPage = () => {
+  const [signInMethod, setSignInMethod] = useState("email");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-    validateField(name, value);
-  };
-
-  const validateField = (name, value) => {
-    let error = "";
-    switch (name) {
-      case "email":
-        if (!/\S+@\S+\.\S+/.test(value)) {
-          error = "Invalid email format";
-        }
-        break;
-      case "phone":
-        if (!/^\d{10}$/.test(value.replace(/\D/g, ''))) {
-          error = "Invalid phone number";
-        }
-        break;
-      case "password":
-        if (!/^(?=.*[A-Z])(?=.*\d).{8,}$/.test(value)) {
-          error = "Password must have at least 8 characters, one uppercase letter, and one number";
-        }
-        break;
-      case "confirmPassword":
-        if (value !== formData.password) {
-          error = "Passwords do not match";
-        }
-        break;
-      default:
-        break;
-    }
-    setErrors({ ...errors, [name]: error });
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setIsSubmitted(true);
-    const formFields = ["email", "phone", "password", "confirmPassword"];
-    formFields.forEach(field => validateField(field, formData[field]));
-    
-    if (Object.values(errors).every(error => error === "")) {
-      console.log("Form submitted", formData);
-    }
+    // Implement your sign-in logic here
+    setMessage("Sign-in successful!");
   };
 
-  const handleThirdPartySignUp = (provider) => {
-    console.log(`Signing up with ${provider}`);
+  const handleThirdPartySignIn = (provider) => {
+    // Implement OAuth logic for third-party sign-ins
+    setMessage(`Signing in with ${provider}...`);
   };
+  if (isSubmitted) {
+    return <Navigate to="/dashboard" />;
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 to-blue-200 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
-        <h2 className="text-3xl text-center mb-6 text-gray-800">Sign Up</h2>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-base py-2 px-3"
-              placeholder="you@example.com"
-              required
-            />
-            {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
-          </div>
-          <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-              Phone Number
-            </label>
-            <input
-              type="tel"
-              id="phone"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-base py-2 px-3"
-              placeholder="(123) 456-7890"
-              required
-            />
-            {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
-          </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-base py-2 px-3"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
-              >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </button>
-            </div>
-            <p className="mt-1 text-xs text-gray-500">Must be at least 8 characters, one capital letter, and one number</p>
-            {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
-          </div>
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-              Confirm Password
-            </label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-base py-2 px-3"
-              required
-            />
-            {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>}
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-sky-300 to-sky-100 flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md"
+      >
+        <h1 className="text-3xl font-bold text-center mb-6 text-sky-700">
+          Sign In
+        </h1>
+
+        <div className="flex justify-center space-x-4 mb-6">
           <button
-            type="submit"
-            className="w-full py-3 px-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out"
+            onClick={() => setSignInMethod("email")}
+            className={`px-4 py-2 rounded-full ${
+              signInMethod === "email"
+                ? "bg-sky-600 text-white"
+                : "bg-gray-200 text-gray-700"
+            } transition-colors duration-300`}
           >
-            Sign Up
+            Email/Phone
           </button>
-        </form>
-        <div className="mt-8">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Or continue with</span>
-            </div>
-          </div>
-          <div className="mt-6 grid grid-cols-3 gap-3">
-            <button
-              onClick={() => handleThirdPartySignUp('Google')}
-              className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-            >
-              <FaGoogle className="text-red-500" />
-            </button>
-            <button
-              onClick={() => handleThirdPartySignUp('Facebook')}
-              className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-            >
-              <FaFacebook className="text-blue-600" />
-            </button>
-            <button
-              onClick={() => handleThirdPartySignUp('Github')}
-              className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-            >
-              <FaGithub className="text-gray-900" />
-            </button>
-          </div>
+          <button
+            onClick={() => setSignInMethod("thirdParty")}
+            className={`px-4 py-2 rounded-full ${
+              signInMethod === "thirdParty"
+                ? "bg-sky-600 text-white"
+                : "bg-gray-200 text-gray-700"
+            } transition-colors duration-300`}
+          >
+            Third-Party
+          </button>
         </div>
-      </div>
+
+        <AnimatePresence mode="wait">
+          {signInMethod === "email" ? (
+            <motion.form
+              key="email-form"
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 50 }}
+              transition={{ duration: 0.3 }}
+              onSubmit={handleSubmit}
+              className="space-y-4"
+            >
+              <div className="relative">
+                <FaUser className="absolute top-3 left-3 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Email or Phone"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full pl-10 pr-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  required
+                  aria-label="Email or Phone"
+                />
+              </div>
+              <div className="relative">
+                <FaLock className="absolute top-3 left-3 text-gray-400" />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-10 pr-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  required
+                  aria-label="Password"
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-sky-600 text-white py-2 rounded-md hover:bg-sky-700 transition-colors duration-300"
+              >
+                Sign In
+              </button>
+            </motion.form>
+          ) : (
+            <motion.div
+              key="third-party"
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 50 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-4"
+            >
+              <button
+                onClick={() => handleThirdPartySignIn("Google")}
+                className="w-full flex items-center justify-center space-x-2 bg-red-500 text-white py-2 rounded-md hover:bg-red-600 transition-colors duration-300"
+              >
+                <FaGoogle />
+                <span>Sign in with Google</span>
+              </button>
+              <button
+                onClick={() => handleThirdPartySignIn("Facebook")}
+                className="w-full flex items-center justify-center space-x-2 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors duration-300"
+              >
+                <FaFacebook />
+                <span>Sign in with Facebook</span>
+              </button>
+              <button
+                onClick={() => handleThirdPartySignIn("GitHub")}
+                className="w-full flex items-center justify-center space-x-2 bg-gray-800 text-white py-2 rounded-md hover:bg-gray-900 transition-colors duration-300"
+              >
+                <FaGithub />
+                <span>Sign in with GitHub</span>
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {message && (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mt-4 text-center text-green-600"
+          >
+            {message}
+          </motion.p>
+        )}
+
+        <p className="mt-6 text-center text-sm text-gray-600">
+          Don't have an account?{" "}
+          <a
+            href="signup"
+            className="text-sky-600 hover:underline"
+          >
+            Sign up here
+          </a>
+        </p>
+      </motion.div>
     </div>
   );
 };
 
-export default SignUpForm;
+export default SignInPage;
