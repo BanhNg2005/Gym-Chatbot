@@ -7,7 +7,7 @@ import { FaBed } from "react-icons/fa";
 import { GiAchievement } from "react-icons/gi";
 import { FiSend, FiMenu } from "react-icons/fi";
 import SignUpForm from "./components/signup";
-import LogInForm from "./components/login";
+import SignInPage from "./components/login";
 import './index.css';
 
 const HomePage = () => {
@@ -232,7 +232,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/signup" element={<SignUpForm />} />
-        <Route path="/login" element={<LogInForm />} />
+        <Route path="/login" element={<SignInPage />} />
       </Routes>
     </Router>
   );
