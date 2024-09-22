@@ -7,6 +7,7 @@ import { FaBed } from "react-icons/fa";
 import { GiAchievement } from "react-icons/gi";
 import { FiSend, FiMenu } from "react-icons/fi";
 import SignUpForm from "./components/signup";
+import LogInForm from "./components/login";
 import './index.css';
 
 const HomePage = () => {
@@ -62,7 +63,7 @@ const HomePage = () => {
               <li><a href="#" className={`hover:text-blue-400 flex items-center ${isDarkMode ? 'text-white' : 'text-gray-900'}`}><FaBed className="mr-1" /> Sleep</a></li>
               <li><a href="#" className={`hover:text-blue-400 flex items-center ${isDarkMode ? 'text-white' : 'text-gray-900'}`}><GiAchievement className="mr-1" /> Achievement</a></li>
             </ul>
-            <Link to="/signup">
+            <Link to="/login">
               <button className="mt-4 md:mt-0 ml-4 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition duration-300 flex items-center">
                 <FaSignInAlt className="mr-2" />
                 Sign In
@@ -231,6 +232,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/signup" element={<SignUpForm />} />
+        <Route path="/login" element={<LogInForm />} />
       </Routes>
     </Router>
   );
