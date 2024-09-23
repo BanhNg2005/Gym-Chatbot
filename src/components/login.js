@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaGoogle, FaFacebook, FaGithub, FaUser, FaLock } from "react-icons/fa";
+import { FaGoogle, FaFacebook, FaGithub, FaUser, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { Navigate } from "react-router-dom";
 
@@ -7,6 +7,7 @@ const SignInPage = () => {
   const [signInMethod, setSignInMethod] = useState("email");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -85,7 +86,7 @@ const SignInPage = () => {
               <div className="relative">
                 <FaLock className="absolute top-3 left-3 text-gray-400" />
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -93,6 +94,13 @@ const SignInPage = () => {
                   required
                   aria-label="Password"
                 />
+                <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
               </div>
               <button
                 type="submit"
