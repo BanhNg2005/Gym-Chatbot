@@ -155,8 +155,8 @@ const HomePage = () => {
             <div
                 className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300`}>
               <img
-                  src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
-                  alt="Nutrition" className="w-full h-56 object-cover"/>
+                  src={require('./nutrition.jpg')}
+                  alt="Nutrition" className="w-full h-60 object-cover"/>
               <div className="p-6">
                 <h3 className="text-2xl font-semibold mb-3">Balanced Nutrition</h3>
                 <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>Learn about proper nutrition to
@@ -168,7 +168,7 @@ const HomePage = () => {
             <div
                 className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300`}>
               <img
-                  src="https://images.unsplash.com/photo-1519003300449-424ad0405076?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+                  src={require('./sleep.jpg')}
                   alt="Sleep" className="w-full h-56 object-cover"/>
               <div className="p-6">
                 <h3 className="text-2xl font-semibold mb-3">Quality Sleep</h3>
@@ -233,6 +233,10 @@ const App = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/signup" element={<SignUpForm />} />
         <Route path="/login" element={<SignInPage />} />
+        <Route path="/sleep" element={<h1>Sleep</h1>} />
+        <Route path="/nutrition" element={<h1>Nutrition</h1>} />
+        <Route path="/workout" element={<h1>Workout</h1>} />
+        <Route path="/achievement" element={<h1>Achievement</h1>} />
       </Routes>
     </Router>
   );
