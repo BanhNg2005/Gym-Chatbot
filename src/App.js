@@ -8,6 +8,7 @@ import { GiAchievement } from "react-icons/gi";
 import { FiSend, FiMenu } from "react-icons/fi";
 import SignUpForm from "./components/signup";
 import SignInPage from "./components/login";
+import videoBg from "./homeBg.mp4";
 import './index.css';
 
 const HomePage = () => {
@@ -87,9 +88,7 @@ const HomePage = () => {
         <section className="mb-12 relative overflow-hidden rounded-lg bg-gray-800 text-white py-20">
           <div className="absolute inset-0 overflow-hidden">
             <video autoPlay loop muted className="w-full h-full object-cover opacity-50">
-              <source
-                  src="https://assets.mixkit.co/videos/preview/mixkit-set-of-plateaus-seen-from-the-heights-in-a-sunset-26070-large.mp4"
-                  type="video/mp4"/>
+              <source src={videoBg} autoPlay loop muted/>
               Your browser does not support the video tag.
             </video>
           </div>
@@ -155,8 +154,8 @@ const HomePage = () => {
             <div
                 className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300`}>
               <img
-                  src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
-                  alt="Nutrition" className="w-full h-56 object-cover"/>
+                  src={require('./nutrition.jpg')}
+                  alt="Nutrition" className="w-full h-60 object-cover"/>
               <div className="p-6">
                 <h3 className="text-2xl font-semibold mb-3">Balanced Nutrition</h3>
                 <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>Learn about proper nutrition to
@@ -168,7 +167,7 @@ const HomePage = () => {
             <div
                 className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300`}>
               <img
-                  src="https://images.unsplash.com/photo-1519003300449-424ad0405076?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+                  src={require('./sleep.jpg')}
                   alt="Sleep" className="w-full h-56 object-cover"/>
               <div className="p-6">
                 <h3 className="text-2xl font-semibold mb-3">Quality Sleep</h3>
@@ -233,6 +232,10 @@ const App = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/signup" element={<SignUpForm />} />
         <Route path="/login" element={<SignInPage />} />
+        <Route path="/sleep" element={<h1>Sleep</h1>} />
+        <Route path="/nutrition" element={<h1>Nutrition</h1>} />
+        <Route path="/workout" element={<h1>Workout</h1>} />
+        <Route path="/achievement" element={<h1>Achievement</h1>} />
       </Routes>
     </Router>
   );
