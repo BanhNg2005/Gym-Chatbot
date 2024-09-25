@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { FaDumbbell, FaChartLine, FaRedo, FaBed, FaRandom } from "react-icons/fa";
 import { Line } from "react-chartjs-2";
-import { Chart as ChartJS, LinearScale, CategoryScale, PointElement, LineElement, Title, Tooltip, Legend } from "chart.js";
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from "chart.js";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -17,29 +17,29 @@ const Workout = () => {
 
   const handleCreateWorkout = (plan) => {
     setWorkoutPlan(plan);
-    // this is left empty for now (will add functionality later)
+    // this is empty for now (will add functionality later)
   };
 
   const handleLogProgress = (progress) => {
     setWorkoutHistory([...workoutHistory, progress]);
-    // this is left empty for now (will add functionality later)
+    // this is empty for now (will add functionality later)
   };
 
   const handleAdjustWorkout = (feedback) => {
-    // this is left empty for now (will add functionality later)
+    // this is empty for now (will add functionality later)
   };
 
   const handleSetRestDay = (day) => {
-    // this is left empty for now (will add functionality later)
+    // this is empty for now (will add functionality later)
   };
 
   const handleExerciseVariation = (exercise, variation) => {
-    // this is left empty for now (will add functionality later)
+    // this is empty for now (will add functionality later)
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-bold text-center text-theme-color-primary mb-8">Workout Planner</h1>
+    <div className="container mx-auto px-4 py-8 bg-lavender-50">
+      <h1 className="text-4xl font-bold text-center text-purple-700 mb-8">Workout Planner</h1>
       <div className="flex justify-center space-x-4 mb-8">
         <TabButton icon={<FaDumbbell />} label="Create Plan" active={activeTab === "create"} onClick={() => handleTabChange("create")} />
         <TabButton icon={<FaChartLine />} label="Track Progress" active={activeTab === "track"} onClick={() => handleTabChange("track")} />
@@ -59,7 +59,7 @@ const Workout = () => {
 
 const TabButton = ({ icon, label, active, onClick }) => (
   <button
-    className={`flex items-center space-x-2 px-4 py-2 rounded-full ${active ? "bg-theme-color-primary text-white" : "bg-gray-200 text-gray-700"}`}
+    className={`flex items-center space-x-2 px-4 py-2 rounded-full ${active ? "bg-purple-500 text-white" : "bg-lavender-200 text-purple-700"}`}
     onClick={onClick}
   >
     {icon}
@@ -95,15 +95,15 @@ const CreateWorkoutPlan = ({ onCreateWorkout }) => {
 
   return (
     <div className="bg-white shadow-md rounded-lg p-6">
-      <h2 className="text-2xl font-semibold mb-4">Create Workout Plan</h2>
+      <h2 className="text-2xl font-semibold mb-4 text-purple-700">Create Workout Plan</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="workoutType">
+          <label className="block text-purple-700 text-sm font-bold mb-2" htmlFor="workoutType">
             Workout Type
           </label>
           <select
             id="workoutType"
-            className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${errors.workoutType ? "border-red-500" : ""}`}
+            className={`shadow appearance-none border rounded w-full py-2 px-3 text-purple-700 leading-tight focus:outline-none focus:shadow-outline ${errors.workoutType ? "border-red-500" : ""}`}
             value={workoutType}
             onChange={(e) => setWorkoutType(e.target.value)}
           >
@@ -115,26 +115,26 @@ const CreateWorkoutPlan = ({ onCreateWorkout }) => {
           {errors.workoutType && <p className="text-red-500 text-xs italic">{errors.workoutType}</p>}
         </div>
         <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="duration">
+          <label className="block text-purple-700 text-sm font-bold mb-2" htmlFor="duration">
             Duration (minutes)
           </label>
           <input
             type="number"
             id="duration"
-            className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${errors.duration ? "border-red-500" : ""}`}
+            className={`shadow appearance-none border rounded w-full py-2 px-3 text-purple-700 leading-tight focus:outline-none focus:shadow-outline ${errors.duration ? "border-red-500" : ""}`}
             value={duration}
             onChange={(e) => setDuration(e.target.value)}
           />
           {errors.duration && <p className="text-red-500 text-xs italic">{errors.duration}</p>}
         </div>
         <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Muscle Groups</label>
+          <label className="block text-purple-700 text-sm font-bold mb-2">Muscle Groups</label>
           <div className="flex flex-wrap">
             {["Chest", "Back", "Legs", "Arms", "Shoulders", "Core"].map((group) => (
               <label key={group} className="inline-flex items-center mr-4 mb-2">
                 <input
                   type="checkbox"
-                  className="form-checkbox"
+                  className="form-checkbox text-purple-500"
                   value={group}
                   checked={muscleGroups.includes(group)}
                   onChange={(e) => {
@@ -145,7 +145,7 @@ const CreateWorkoutPlan = ({ onCreateWorkout }) => {
                     }
                   }}
                 />
-                <span className="ml-2">{group}</span>
+                <span className="ml-2 text-purple-700">{group}</span>
               </label>
             ))}
           </div>
@@ -153,7 +153,7 @@ const CreateWorkoutPlan = ({ onCreateWorkout }) => {
         </div>
         <button
           type="submit"
-          className="bg-theme-color-primary hover:bg-theme-color-primary-dark text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
         >
           Create Workout Plan
         </button>
@@ -184,7 +184,7 @@ const TrackWorkoutProgress = ({ onLogProgress, history }) => {
       {
         label: "Weight Lifted",
         data: history.map((entry) => entry.weight),
-        borderColor: "rgb(75, 192, 192)",
+        borderColor: "rgb(147, 112, 219)",
         tension: 0.1,
       },
     ],
@@ -192,56 +192,56 @@ const TrackWorkoutProgress = ({ onLogProgress, history }) => {
 
   return (
     <div className="bg-white shadow-md rounded-lg p-6">
-      <h2 className="text-2xl font-semibold mb-4">Track Workout Progress</h2>
+      <h2 className="text-2xl font-semibold mb-4 text-purple-700">Track Workout Progress</h2>
       <form onSubmit={handleSubmit} className="mb-6">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="exercise">
+            <label className="block text-purple-700 text-sm font-bold mb-2" htmlFor="exercise">
               Exercise
             </label>
             <input
               type="text"
               id="exercise"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-purple-700 leading-tight focus:outline-none focus:shadow-outline"
               value={exercise}
               onChange={(e) => setExercise(e.target.value)}
               required
             />
           </div>
           <div>
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="sets">
+            <label className="block text-purple-700 text-sm font-bold mb-2" htmlFor="sets">
               Sets
             </label>
             <input
               type="number"
               id="sets"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-purple-700 leading-tight focus:outline-none focus:shadow-outline"
               value={sets}
               onChange={(e) => setSets(e.target.value)}
               required
             />
           </div>
           <div>
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="reps">
+            <label className="block text-purple-700 text-sm font-bold mb-2" htmlFor="reps">
               Reps
             </label>
             <input
               type="number"
               id="reps"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-purple-700 leading-tight focus:outline-none focus:shadow-outline"
               value={reps}
               onChange={(e) => setReps(e.target.value)}
               required
             />
           </div>
           <div>
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="weight">
+            <label className="block text-purple-700 text-sm font-bold mb-2" htmlFor="weight">
               Weight (lbs)
             </label>
             <input
               type="number"
               id="weight"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-purple-700 leading-tight focus:outline-none focus:shadow-outline"
               value={weight}
               onChange={(e) => setWeight(e.target.value)}
               required
@@ -250,25 +250,25 @@ const TrackWorkoutProgress = ({ onLogProgress, history }) => {
         </div>
         <button
           type="submit"
-          className="mt-4 bg-theme-color-primary hover:bg-theme-color-primary-dark text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          className="mt-4 bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
         >
           Log Progress
         </button>
       </form>
       <div className="mb-6">
-        <h3 className="text-xl font-semibold mb-2">Progress Chart</h3>
+        <h3 className="text-xl font-semibold mb-2 text-purple-700">Progress Chart</h3>
         <Line data={chartData} />
       </div>
       <div>
-        <h3 className="text-xl font-semibold mb-2">Workout History</h3>
-        <ul className="divide-y divide-gray-200">
+        <h3 className="text-xl font-semibold mb-2 text-purple-700">Workout History</h3>
+        <ul className="divide-y divide-purple-200">
           {history.map((entry, index) => (
             <li key={index} className="py-4">
-              <p className="text-sm font-medium text-gray-900">{entry.exercise}</p>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm font-medium text-purple-900">{entry.exercise}</p>
+              <p className="text-sm text-purple-500">
                 {entry.sets} sets x {entry.reps} reps @ {entry.weight} lbs
               </p>
-              <p className="text-sm text-gray-500">{entry.date.toLocaleString()}</p>
+              <p className="text-sm text-purple-500">{entry.date.toLocaleString()}</p>
             </li>
           ))}
         </ul>
@@ -291,16 +291,16 @@ const AdjustWorkout = ({ onAdjustWorkout }) => {
 
   return (
     <div className="bg-white shadow-md rounded-lg p-6">
-      <h2 className="text-2xl font-semibold mb-4">Adjust Workout</h2>
+      <h2 className="text-2xl font-semibold mb-4 text-purple-700">Adjust Workout</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Workout Difficulty</label>
+          <label className="block text-purple-700 text-sm font-bold mb-2">Workout Difficulty</label>
           <div className="flex items-center space-x-2">
             {[1, 2, 3, 4, 5].map((value) => (
               <button
                 key={value}
                 type="button"
-                className={`w-8 h-8 rounded-full focus:outline-none ${difficulty === value ? "bg-theme-color-primary text-white" : "bg-gray-200"}`}
+                className={`w-8 h-8 rounded-full focus:outline-none ${difficulty === value ? "bg-purple-500 text-white" : "bg-lavender-200"}`}
                 onClick={() => setDifficulty(value)}
               >
                 {value}
@@ -309,12 +309,12 @@ const AdjustWorkout = ({ onAdjustWorkout }) => {
           </div>
         </div>
         <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="feedback">
+          <label className="block text-purple-700 text-sm font-bold mb-2" htmlFor="feedback">
             Feedback
           </label>
           <textarea
             id="feedback"
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-purple-700 leading-tight focus:outline-none focus:shadow-outline"
             rows="4"
             value={feedback}
             onChange={(e) => setFeedback(e.target.value)}
@@ -322,7 +322,7 @@ const AdjustWorkout = ({ onAdjustWorkout }) => {
         </div>
         <button
           type="submit"
-          className="bg-theme-color-primary hover:bg-theme-color-primary-dark text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
         >
           Submit Adjustment
         </button>
@@ -349,14 +349,14 @@ const RestDays = ({ onSetRestDay }) => {
 
   return (
     <div className="bg-white shadow-md rounded-lg p-6">
-      <h2 className="text-2xl font-semibold mb-4">Set Rest Days</h2>
+      <h2 className="text-2xl font-semibold mb-4 text-purple-700">Set Rest Days</h2>
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-7 gap-2 mb-4">
           {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
             <button
               key={day}
               type="button"
-              className={`p-2 rounded ${selectedDays.includes(day) ? "bg-theme-color-primary text-white" : "bg-gray-200"}`}
+              className={`p-2 rounded ${selectedDays.includes(day) ? "bg-purple-500 text-white" : "bg-lavender-200"}`}
               onClick={() => toggleDay(day)}
             >
               {day}
@@ -365,14 +365,14 @@ const RestDays = ({ onSetRestDay }) => {
         </div>
         <button
           type="submit"
-          className="bg-theme-color-primary hover:bg-theme-color-primary-dark text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
         >
           Set Rest Days
         </button>
       </form>
       <div className="mt-4">
-        <h3 className="text-lg font-semibold mb-2">Why Rest Days Matter</h3>
-        <p className="text-gray-700">
+        <h3 className="text-lg font-semibold mb-2 text-purple-700">Why Rest Days Matter</h3>
+        <p className="text-purple-700">
           Rest days are crucial for muscle recovery and growth. They help prevent burnout and reduce the risk of injury.
           Aim for 1-2 rest days per week, depending on your workout intensity and fitness level.
         </p>
@@ -405,13 +405,13 @@ const ExerciseVariations = ({ onSelectVariation }) => {
 
   return (
     <div className="bg-white shadow-md rounded-lg p-6">
-      <h2 className="text-2xl font-semibold mb-4">Exercise Variations</h2>
+      <h2 className="text-2xl font-semibold mb-4 text-purple-700">Exercise Variations</h2>
       <div className="grid grid-cols-2 gap-4">
         {exercises.map((exercise) => (
           <div key={exercise.name} className="border rounded-lg p-4">
-            <h3 className="text-lg font-semibold mb-2">{exercise.name}</h3>
+            <h3 className="text-lg font-semibold mb-2 text-purple-700">{exercise.name}</h3>
             <button
-              className="bg-theme-color-primary hover:bg-theme-color-primary-dark text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
               onClick={() => setSelectedExercise(exercise)}
             >
               View Variations
@@ -421,14 +421,14 @@ const ExerciseVariations = ({ onSelectVariation }) => {
       </div>
       {selectedExercise && (
         <div className="mt-6">
-          <h3 className="text-xl font-semibold mb-4">{selectedExercise.name} Variations</h3>
+          <h3 className="text-xl font-semibold mb-4 text-purple-700">{selectedExercise.name} Variations</h3>
           <div className="grid grid-cols-3 gap-4">
             {selectedExercise.variations.map((variation) => (
               <div key={variation.name} className="border rounded-lg p-4">
                 <img src={variation.image} alt={variation.name} className="w-full h-40 object-cover rounded-lg mb-2" />
-                <h4 className="font-semibold mb-2">{variation.name}</h4>
+                <h4 className="font-semibold mb-2 text-purple-700">{variation.name}</h4>
                 <button
-                  className="bg-theme-color-secondary hover:bg-theme-color-secondary-dark text-theme-color-secondary-content font-bold py-1 px-2 rounded text-sm focus:outline-none focus:shadow-outline"
+                  className="bg-lavender-300 hover:bg-lavender-400 text-purple-700 font-bold py-1 px-2 rounded text-sm focus:outline-none focus:shadow-outline"
                   onClick={() => onSelectVariation(selectedExercise.name, variation.name)}
                 >
                   Select
