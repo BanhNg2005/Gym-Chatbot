@@ -13,12 +13,12 @@ const SignInPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Implement your sign-in logic here
+    // this is left empty for now (will add functionality later)
     setMessage("Sign-in successful!");
   };
 
   const handleThirdPartySignIn = (provider) => {
-    // Implement OAuth logic for third-party sign-ins
+    // this is left empty for now (will add functionality later)
     setMessage(`Signing in with ${provider}...`);
   };
   if (isSubmitted) {
