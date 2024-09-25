@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import { FaDumbbell, FaChartLine, FaRedo, FaBed, FaRandom } from "react-icons/fa";
 import { Line } from "react-chartjs-2";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { FaSignInAlt, FaMoon, FaSun } from "react-icons/fa";
+import { IoMdFitness, IoMdNutrition } from "react-icons/io";
+import { GiAchievement } from "react-icons/gi";
+import { FiSend, FiMenu } from "react-icons/fi";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from "chart.js";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
@@ -10,6 +15,8 @@ const Workout = () => {
   const [workoutPlan, setWorkoutPlan] = useState({});
   const [workoutHistory, setWorkoutHistory] = useState([]);
   const [exerciseSuggestions, setExerciseSuggestions] = useState([]);
+  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -36,9 +43,60 @@ const Workout = () => {
   const handleExerciseVariation = (exercise, variation) => {
     // this is empty for now (will add functionality later)
   };
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+  };
 
   return (
     <div className="container mx-auto px-4 py-8 bg-lavender-50">
+        <style>
+        {`
+          @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+          body {
+            font-family: 'Poppins', sans-serif;
+          }
+        `}
+      </style>
+      <header className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} p-4 shadow-md`}>
+        <div className="container mx-auto flex justify-between items-center">
+          <a href="/" className="text-2xl font-bold">DREAMS</a>
+          <div className="md:hidden">
+            <button onClick={toggleMenu} className={`${isDarkMode ? 'text-white' : 'text-gray-900'} focus:outline-none`}>
+              <FiMenu size={24} />
+            </button>
+          </div>
+          <nav className={`${isMenuOpen ? 'block' : 'hidden'} md:flex md:items-center absolute md:relative top-16 left-0 right-0 ${isDarkMode ? 'bg-gray-800' : 'bg-white'} md:bg-transparent z-20 md:top-0`}>
+            <ul className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 p-4 md:p-0">
+              <li><Link to="/workout" className={`hover:text-blue-400 flex items-center ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+              <IoMdFitness className="mr-1" /> Workout
+            </Link></li>
+              <li><a href="#" className={`hover:text-blue-400 flex items-center ${isDarkMode ? 'text-white' : 'text-gray-900'}`}><IoMdNutrition className="mr-1" /> Nutrition</a></li>
+              <li><a href="#" className={`hover:text-blue-400 flex items-center ${isDarkMode ? 'text-white' : 'text-gray-900'}`}><FaBed className="mr-1" /> Sleep</a></li>
+              <li><a href="#" className={`hover:text-blue-400 flex items-center ${isDarkMode ? 'text-white' : 'text-gray-900'}`}><GiAchievement className="mr-1" /> Achievement</a></li>
+            </ul>
+            <Link to="/login">
+              <button className="mt-4 md:mt-0 ml-4 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition duration-300 flex items-center">
+                <FaSignInAlt className="mr-2" />
+                Sign In
+              </button>
+            </Link>
+            <button
+              onClick={toggleDarkMode}
+              className="ml-4 p-2 rounded-full focus:outline-none transition-colors duration-200 ease-in-out"
+            >
+              {isDarkMode ? (
+                <FaSun className="text-yellow-400" size={24} />
+              ) : (
+                <FaMoon className="text-gray-700" size={24} />
+              )}
+            </button>
+          </nav>
+        </div>
+      </header>
       <h1 className="text-4xl font-bold text-center text-purple-700 mb-8">Workout Planner</h1>
       <div className="flex justify-center space-x-4 mb-8">
         <TabButton icon={<FaDumbbell />} label="Create Plan" active={activeTab === "create"} onClick={() => handleTabChange("create")} />
