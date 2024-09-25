@@ -8,6 +8,7 @@ import { GiAchievement } from "react-icons/gi";
 import { FiSend, FiMenu } from "react-icons/fi";
 import SignUpForm from "./components/signup";
 import SignInPage from "./components/login";
+import videoBg from "./homeBg.mp4";
 import './index.css';
 
 const HomePage = () => {
@@ -87,9 +88,7 @@ const HomePage = () => {
         <section className="mb-12 relative overflow-hidden rounded-lg bg-gray-800 text-white py-20">
           <div className="absolute inset-0 overflow-hidden">
             <video autoPlay loop muted className="w-full h-full object-cover opacity-50">
-              <source
-                  src="https://assets.mixkit.co/videos/preview/mixkit-set-of-plateaus-seen-from-the-heights-in-a-sunset-26070-large.mp4"
-                  type="video/mp4"/>
+              <source src={videoBg} autoPlay loop muted/>
               Your browser does not support the video tag.
             </video>
           </div>
