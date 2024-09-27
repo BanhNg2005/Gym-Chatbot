@@ -1,20 +1,15 @@
 import React, { useState } from "react";
 import { FaDumbbell, FaChartLine, FaRedo, FaBed, FaRandom } from "react-icons/fa";
-import { Line } from "react-chartjs-2";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { FaSignInAlt, FaMoon, FaSun } from "react-icons/fa";
 import { IoMdFitness, IoMdNutrition } from "react-icons/io";
 import { GiAchievement } from "react-icons/gi";
 import { FiSend, FiMenu } from "react-icons/fi";
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from "chart.js";
-
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 const Workout = () => {
   const [activeTab, setActiveTab] = useState("create");
   const [workoutPlan, setWorkoutPlan] = useState({});
   const [workoutHistory, setWorkoutHistory] = useState([]);
-  const [exerciseSuggestions, setExerciseSuggestions] = useState([]);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -52,7 +47,7 @@ const Workout = () => {
   };
 
   return (
-    <div className={`container mx-auto px-4 py-8 min-h-screen w-full ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
+    <div className={`min-h-screen ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"}`}>
         <style>
         {`
           @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
@@ -64,7 +59,7 @@ const Workout = () => {
         `}
       </style>
       <header className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} p-4 shadow-md`}>
-      <div className="container mx-auto flex justify-between items-center">
+        <div className="container mx-auto flex justify-between items-center">
           <a href="/" className="text-2xl font-bold">DREAMS</a>
           <div className="md:hidden">
             <button onClick={toggleMenu} className={`${isDarkMode ? 'text-white' : 'text-gray-900'} focus:outline-none`}>
@@ -99,7 +94,7 @@ const Workout = () => {
           </nav>
         </div>
       </header>
-      <h1 className="text-4xl font-bold text-center text-purple-700 mb-8">Workout Planner</h1>
+      <h1 className={`text-4xl font-bold text-center mb-8 ${isDarkMode ? 'text-white' : 'text-black'}`}>Workout Planner</h1>
       <div className="flex justify-center space-x-4 mb-8">
         <TabButton icon={<FaDumbbell />} label="Create Plan" active={activeTab === "create"} onClick={() => handleTabChange("create")} />
         <TabButton icon={<FaRedo />} label="Adjust Workout" active={activeTab === "adjust"} onClick={() => handleTabChange("adjust")} />
@@ -111,6 +106,7 @@ const Workout = () => {
       {activeTab === "adjust" && <AdjustWorkout onAdjustWorkout={handleAdjustWorkout} />}
       {activeTab === "rest" && <RestDays onSetRestDay={handleSetRestDay} />}
       {activeTab === "variations" && <ExerciseVariations onSelectVariation={handleExerciseVariation} />}
+      {activeTab === "create" && <CreateWorkoutPlan onCreateWorkout={handleCreateWorkout} isDarkMode={isDarkMode} />}
     </div>
   );
 };
@@ -125,7 +121,7 @@ const TabButton = ({ icon, label, active, onClick }) => (
   </button>
 );
 
-const CreateWorkoutPlan = ({ onCreateWorkout }) => {
+const CreateWorkoutPlan = ({ onCreateWorkout, isDarkMode }) => {
   const [workoutType, setWorkoutType] = useState("");
   const [duration, setDuration] = useState("");
   const [muscleGroups, setMuscleGroups] = useState([]);
@@ -153,15 +149,15 @@ const CreateWorkoutPlan = ({ onCreateWorkout }) => {
 
   return (
     <div className="bg-white shadow-md rounded-lg p-6">
-      <h2 className="text-2xl font-semibold mb-4 text-purple-700">Create Workout Plan</h2>
+      <h2 className={`text-2xl font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-black'}`}>Create Workout Plan</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label className="block text-purple-700 text-sm font-bold mb-2" htmlFor="workoutType">
+          <label className={`block text-sm font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-black'}`} htmlFor="workoutType">
             Workout Type
           </label>
           <select
             id="workoutType"
-            className={`shadow appearance-none border rounded w-full py-2 px-3 text-purple-700 leading-tight focus:outline-none focus:shadow-outline ${errors.workoutType ? "border-red-500" : ""}`}
+            className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${errors.workoutType ? "border-red-500" : ""} ${isDarkMode ? 'text-white' : 'text-black'}`}
             value={workoutType}
             onChange={(e) => setWorkoutType(e.target.value)}
           >
@@ -173,20 +169,20 @@ const CreateWorkoutPlan = ({ onCreateWorkout }) => {
           {errors.workoutType && <p className="text-red-500 text-xs italic">{errors.workoutType}</p>}
         </div>
         <div className="mb-4">
-          <label className="block text-purple-700 text-sm font-bold mb-2" htmlFor="duration">
+          <label className={`block text-sm font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-black'}`} htmlFor="duration">
             Duration (minutes)
           </label>
           <input
             type="number"
             id="duration"
-            className={`shadow appearance-none border rounded w-full py-2 px-3 text-purple-700 leading-tight focus:outline-none focus:shadow-outline ${errors.duration ? "border-red-500" : ""}`}
+            className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${errors.duration ? "border-red-500" : ""} ${isDarkMode ? 'text-white' : 'text-black'}`}
             value={duration}
             onChange={(e) => setDuration(e.target.value)}
           />
           {errors.duration && <p className="text-red-500 text-xs italic">{errors.duration}</p>}
         </div>
         <div className="mb-4">
-          <label className="block text-purple-700 text-sm font-bold mb-2">Muscle Groups</label>
+          <label className={`block text-sm font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-black'}`}>Muscle Groups</label>
           <div className="flex flex-wrap">
             {["Chest", "Back", "Legs", "Arms", "Shoulders", "Core"].map((group) => (
               <label key={group} className="inline-flex items-center mr-4 mb-2">
@@ -203,7 +199,7 @@ const CreateWorkoutPlan = ({ onCreateWorkout }) => {
                     }
                   }}
                 />
-                <span className="ml-2 text-purple-700">{group}</span>
+                <span className={`ml-2 ${isDarkMode ? 'text-white' : 'text-black'}`}>{group}</span>
               </label>
             ))}
           </div>
