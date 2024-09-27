@@ -94,7 +94,7 @@ const Workout = () => {
           </nav>
         </div>
       </header>
-      <h1 className={`text-4xl font-bold text-center mb-8 ${isDarkMode ? 'text-white' : 'text-black'}`}>Workout Planner</h1>
+      <h1 className={`text-4xl font-bold text-center mt-8 mb-8 ${isDarkMode ? 'text-white' : 'text-black'}`}>Workout Planner</h1>
       <div className="flex justify-center space-x-4 mb-8">
         <TabButton icon={<FaDumbbell />} label="Create Plan" active={activeTab === "create"} onClick={() => handleTabChange("create")} />
         <TabButton icon={<FaRedo />} label="Adjust Workout" active={activeTab === "adjust"} onClick={() => handleTabChange("adjust")} />
@@ -102,18 +102,17 @@ const Workout = () => {
         <TabButton icon={<FaRandom />} label="Variations" active={activeTab === "variations"} onClick={() => handleTabChange("variations")} />
       </div>
 
-      {activeTab === "create" && <CreateWorkoutPlan onCreateWorkout={handleCreateWorkout} />}
-      {activeTab === "adjust" && <AdjustWorkout onAdjustWorkout={handleAdjustWorkout} />}
-      {activeTab === "rest" && <RestDays onSetRestDay={handleSetRestDay} />}
-      {activeTab === "variations" && <ExerciseVariations onSelectVariation={handleExerciseVariation} />}
       {activeTab === "create" && <CreateWorkoutPlan onCreateWorkout={handleCreateWorkout} isDarkMode={isDarkMode} />}
+      {activeTab === "adjust" && <AdjustWorkout onAdjustWorkout={handleAdjustWorkout} isDarkMode={isDarkMode} />}
+      {activeTab === "rest" && <RestDays onSetRestDay={handleSetRestDay} isDarkMode={isDarkMode} />}
+      {activeTab === "variations" && <ExerciseVariations onSelectVariation={handleExerciseVariation} isDarkMode={isDarkMode} />}
     </div>
   );
 };
 
-const TabButton = ({ icon, label, active, onClick }) => (
+const TabButton = ({ icon, label, active, onClick, isDarkMode }) => (
   <button
-    className={`flex items-center space-x-2 px-4 py-2 rounded-full ${active ? "bg-purple-500 text-white" : "bg-lavender-200 text-purple-700"}`}
+    className={`flex items-center space-x-2 px-4 py-2 rounded-full ${active ? "bg-purple-500 text-white" : `${isDarkMode ? "bg-gray-700 text-gray-200" : "bg-gray-200 text-gray-800"}`}`}
     onClick={onClick}
   >
     {icon}
@@ -140,7 +139,6 @@ const CreateWorkoutPlan = ({ onCreateWorkout, isDarkMode }) => {
     }
 
     onCreateWorkout({ workoutType, duration, muscleGroups });
-    // Reset form
     setWorkoutType("");
     setDuration("");
     setMuscleGroups([]);
@@ -148,7 +146,7 @@ const CreateWorkoutPlan = ({ onCreateWorkout, isDarkMode }) => {
   };
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-6">
+    <div className={`shadow-md rounded-lg p-6 ${isDarkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"}`}>
       <h2 className={`text-2xl font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-black'}`}>Create Workout Plan</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
@@ -157,7 +155,7 @@ const CreateWorkoutPlan = ({ onCreateWorkout, isDarkMode }) => {
           </label>
           <select
             id="workoutType"
-            className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${errors.workoutType ? "border-red-500" : ""} ${isDarkMode ? 'text-white' : 'text-black'}`}
+            className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${errors.workoutType ? "border-red-500" : ""} ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-black'}`}
             value={workoutType}
             onChange={(e) => setWorkoutType(e.target.value)}
           >
@@ -175,7 +173,7 @@ const CreateWorkoutPlan = ({ onCreateWorkout, isDarkMode }) => {
           <input
             type="number"
             id="duration"
-            className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${errors.duration ? "border-red-500" : ""} ${isDarkMode ? 'text-white' : 'text-black'}`}
+            className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${errors.duration ? "border-red-500" : ""} ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-black'}`}
             value={duration}
             onChange={(e) => setDuration(e.target.value)}
           />
@@ -207,7 +205,7 @@ const CreateWorkoutPlan = ({ onCreateWorkout, isDarkMode }) => {
         </div>
         <button
           type="submit"
-          className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-3xl focus:outline-none focus:shadow-outline"
         >
           Create Workout Plan
         </button>
