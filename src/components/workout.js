@@ -52,17 +52,19 @@ const Workout = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 bg-lavender-50">
+    <div className={`container mx-auto px-4 py-8 min-h-screen w-full ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
         <style>
         {`
           @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-          body {
+            body {
             font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            margin: 0;
           }
         `}
       </style>
       <header className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} p-4 shadow-md`}>
-        <div className="container mx-auto flex justify-between items-center">
+      <div className="container mx-auto flex justify-between items-center">
           <a href="/" className="text-2xl font-bold">DREAMS</a>
           <div className="md:hidden">
             <button onClick={toggleMenu} className={`${isDarkMode ? 'text-white' : 'text-gray-900'} focus:outline-none`}>
@@ -100,14 +102,12 @@ const Workout = () => {
       <h1 className="text-4xl font-bold text-center text-purple-700 mb-8">Workout Planner</h1>
       <div className="flex justify-center space-x-4 mb-8">
         <TabButton icon={<FaDumbbell />} label="Create Plan" active={activeTab === "create"} onClick={() => handleTabChange("create")} />
-        <TabButton icon={<FaChartLine />} label="Track Progress" active={activeTab === "track"} onClick={() => handleTabChange("track")} />
         <TabButton icon={<FaRedo />} label="Adjust Workout" active={activeTab === "adjust"} onClick={() => handleTabChange("adjust")} />
         <TabButton icon={<FaBed />} label="Rest Days" active={activeTab === "rest"} onClick={() => handleTabChange("rest")} />
         <TabButton icon={<FaRandom />} label="Variations" active={activeTab === "variations"} onClick={() => handleTabChange("variations")} />
       </div>
 
       {activeTab === "create" && <CreateWorkoutPlan onCreateWorkout={handleCreateWorkout} />}
-      {activeTab === "track" && <TrackWorkoutProgress onLogProgress={handleLogProgress} history={workoutHistory} />}
       {activeTab === "adjust" && <AdjustWorkout onAdjustWorkout={handleAdjustWorkout} />}
       {activeTab === "rest" && <RestDays onSetRestDay={handleSetRestDay} />}
       {activeTab === "variations" && <ExerciseVariations onSelectVariation={handleExerciseVariation} />}
@@ -220,120 +220,6 @@ const CreateWorkoutPlan = ({ onCreateWorkout }) => {
   );
 };
 
-const TrackWorkoutProgress = ({ onLogProgress, history }) => {
-  const [exercise, setExercise] = useState("");
-  const [sets, setSets] = useState("");
-  const [reps, setReps] = useState("");
-  const [weight, setWeight] = useState("");
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onLogProgress({ exercise, sets, reps, weight, date: new Date() });
-    // Reset form
-    setExercise("");
-    setSets("");
-    setReps("");
-    setWeight("");
-  };
-
-  const chartData = {
-    labels: history.map((entry) => entry.date.toLocaleDateString()),
-    datasets: [
-      {
-        label: "Weight Lifted",
-        data: history.map((entry) => entry.weight),
-        borderColor: "rgb(147, 112, 219)",
-        tension: 0.1,
-      },
-    ],
-  };
-
-  return (
-    <div className="bg-white shadow-md rounded-lg p-6">
-      <h2 className="text-2xl font-semibold mb-4 text-purple-700">Track Workout Progress</h2>
-      <form onSubmit={handleSubmit} className="mb-6">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-purple-700 text-sm font-bold mb-2" htmlFor="exercise">
-              Exercise
-            </label>
-            <input
-              type="text"
-              id="exercise"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-purple-700 leading-tight focus:outline-none focus:shadow-outline"
-              value={exercise}
-              onChange={(e) => setExercise(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-purple-700 text-sm font-bold mb-2" htmlFor="sets">
-              Sets
-            </label>
-            <input
-              type="number"
-              id="sets"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-purple-700 leading-tight focus:outline-none focus:shadow-outline"
-              value={sets}
-              onChange={(e) => setSets(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-purple-700 text-sm font-bold mb-2" htmlFor="reps">
-              Reps
-            </label>
-            <input
-              type="number"
-              id="reps"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-purple-700 leading-tight focus:outline-none focus:shadow-outline"
-              value={reps}
-              onChange={(e) => setReps(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-purple-700 text-sm font-bold mb-2" htmlFor="weight">
-              Weight (lbs)
-            </label>
-            <input
-              type="number"
-              id="weight"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-purple-700 leading-tight focus:outline-none focus:shadow-outline"
-              value={weight}
-              onChange={(e) => setWeight(e.target.value)}
-              required
-            />
-          </div>
-        </div>
-        <button
-          type="submit"
-          className="mt-4 bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-        >
-          Log Progress
-        </button>
-      </form>
-      <div className="mb-6">
-        <h3 className="text-xl font-semibold mb-2 text-purple-700">Progress Chart</h3>
-        <Line data={chartData} />
-      </div>
-      <div>
-        <h3 className="text-xl font-semibold mb-2 text-purple-700">Workout History</h3>
-        <ul className="divide-y divide-purple-200">
-          {history.map((entry, index) => (
-            <li key={index} className="py-4">
-              <p className="text-sm font-medium text-purple-900">{entry.exercise}</p>
-              <p className="text-sm text-purple-500">
-                {entry.sets} sets x {entry.reps} reps @ {entry.weight} lbs
-              </p>
-              <p className="text-sm text-purple-500">{entry.date.toLocaleString()}</p>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
-};
 
 const AdjustWorkout = ({ onAdjustWorkout }) => {
   const [difficulty, setDifficulty] = useState(3);
