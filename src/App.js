@@ -8,6 +8,7 @@ import { GiAchievement } from "react-icons/gi";
 import { FiSend, FiMenu } from "react-icons/fi";
 import SignUpForm from "./components/signup";
 import SignInPage from "./components/login";
+import Workout from "./components/workout";
 import videoBg from "./homeBg.mp4";
 import './index.css';
 
@@ -49,7 +50,7 @@ const HomePage = () => {
           }
         `}
       </style>
-      <header className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} p-4 shadow-md`}>
+      <header className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} sticky top-0 left-0 w-full p-4 shadow-md z-50`}>
         <div className="container mx-auto flex justify-between items-center">
           <a href="#" className="text-2xl font-bold">DREAMS</a>
           <div className="md:hidden">
@@ -59,10 +60,26 @@ const HomePage = () => {
           </div>
           <nav className={`${isMenuOpen ? 'block' : 'hidden'} md:flex md:items-center absolute md:relative top-16 left-0 right-0 ${isDarkMode ? 'bg-gray-800' : 'bg-white'} md:bg-transparent z-20 md:top-0`}>
             <ul className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 p-4 md:p-0">
-              <li><a href="#" className={`hover:text-blue-400 flex items-center ${isDarkMode ? 'text-white' : 'text-gray-900'}`}><IoMdFitness className="mr-1" /> Workout</a></li>
-              <li><a href="#" className={`hover:text-blue-400 flex items-center ${isDarkMode ? 'text-white' : 'text-gray-900'}`}><IoMdNutrition className="mr-1" /> Nutrition</a></li>
-              <li><a href="#" className={`hover:text-blue-400 flex items-center ${isDarkMode ? 'text-white' : 'text-gray-900'}`}><FaBed className="mr-1" /> Sleep</a></li>
-              <li><a href="#" className={`hover:text-blue-400 flex items-center ${isDarkMode ? 'text-white' : 'text-gray-900'}`}><GiAchievement className="mr-1" /> Achievement</a></li>
+              <li>
+                <Link to="/workout" className={`hover:text-blue-400 flex items-center ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  <IoMdFitness className="mr-1" /> Workout
+                </Link>
+              </li>
+              <li>
+                <a href="#" className={`hover:text-blue-400 flex items-center ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  <IoMdNutrition className="mr-1" /> Nutrition
+                </a>
+              </li>
+              <li>
+                <a href="#" className={`hover:text-blue-400 flex items-center ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  <FaBed className="mr-1" /> Sleep
+                </a>
+              </li>
+              <li>
+                <a href="#" className={`hover:text-blue-400 flex items-center ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                <GiAchievement className="mr-1" /> Achievement
+                </a>
+              </li>
             </ul>
             <Link to="/login">
               <button className="mt-4 md:mt-0 ml-4 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition duration-300 flex items-center">
@@ -83,7 +100,6 @@ const HomePage = () => {
           </nav>
         </div>
       </header>
-
       <main className="container mx-auto mt-8 px-4">
         <section className="mb-12 relative overflow-hidden rounded-lg bg-gray-800 text-white py-20">
           <div className="absolute inset-0 overflow-hidden">
@@ -234,7 +250,7 @@ const App = () => {
         <Route path="/login" element={<SignInPage />} />
         <Route path="/sleep" element={<h1>Sleep</h1>} />
         <Route path="/nutrition" element={<h1>Nutrition</h1>} />
-        <Route path="/workout" element={<h1>Workout</h1>} />
+        <Route path="/workout" element={<Workout />} />
         <Route path="/achievement" element={<h1>Achievement</h1>} />
       </Routes>
     </Router>

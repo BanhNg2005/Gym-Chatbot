@@ -1,28 +1,42 @@
 import React, { useState } from "react";
-import { FaGoogle, FaFacebook, FaGithub, FaUser, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaGoogle, FaFacebook, FaGithub, FaUser, FaLock } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
-import { Navigate } from "react-router-dom";
+import { Navigate } from 'react-router-dom';
 
 const SignInPage = () => {
   const [signInMethod, setSignInMethod] = useState("email");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Implement your sign-in logic here
+    // this is empty for now (will add functionality later)
     setMessage("Sign-in successful!");
+    setIsSubmitted(true); 
   };
 
   const handleThirdPartySignIn = (provider) => {
-    // Implement OAuth logic for third-party sign-ins
+    // this is empty for now (will add functionality later)
     setMessage(`Signing in with ${provider}...`);
   };
+
+  const handleForgotPassword = (e) => {
+    e.preventDefault();
+    // this is empty for now (will add functionality later)
+    setMessage("Password reset link sent to your email!");
+    setShowForgotPassword(false);
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+  
   if (isSubmitted) {
-    return <Navigate to="/dashboard" />;
+    return <Navigate to="/" />;
   }
 
   return (
@@ -61,13 +75,13 @@ const SignInPage = () => {
         </div>
 
         <AnimatePresence mode="wait">
-          {signInMethod === "email" ? (
+          {signInMethod === "email" && !showForgotPassword ? (
             <motion.form
               key="email-form"
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 50 }}
-              transition={{ duration: 0.4 }}
+              transition={{ duration: 0.3 }}
               onSubmit={handleSubmit}
               className="space-y-4"
             >
@@ -94,19 +108,65 @@ const SignInPage = () => {
                   required
                   aria-label="Password"
                 />
-                <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
-                >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </button>
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="showPassword"
+                  checked={showPassword}
+                  onChange={togglePasswordVisibility}
+                  className="mr-2"
+                />
+                <label htmlFor="showPassword" className="text-sm text-gray-600">
+                  Show Password
+                </label>
               </div>
               <button
                 type="submit"
                 className="w-full bg-sky-600 text-white py-2 rounded-md hover:bg-sky-700 transition-colors duration-300"
               >
                 Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowForgotPassword(true)}
+                className="w-full text-sky-600 text-sm hover:underline"
+              >
+                Forgot Password?
+              </button>
+            </motion.form>
+          ) : signInMethod === "email" && showForgotPassword ? (
+            <motion.form
+              key="forgot-password-form"
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 50 }}
+              transition={{ duration: 0.3 }}
+              onSubmit={handleForgotPassword}
+              className="space-y-4"
+            >
+              <div className="relative">
+                <FaUser className="absolute top-3 left-3 text-gray-400" />
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  className="w-full pl-10 pr-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  required
+                  aria-label="Email for password reset"
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-sky-600 text-white py-2 rounded-md hover:bg-sky-700 transition-colors duration-300"
+              >
+                Reset Password
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowForgotPassword(false)}
+                className="w-full text-sky-600 text-sm hover:underline"
+              >
+                Back to Sign In
               </button>
             </motion.form>
           ) : (
@@ -115,7 +175,7 @@ const SignInPage = () => {
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -50 }}
-              transition={{ duration: 0.4 }}
+              transition={{ duration: 0.3 }}
               className="space-y-4"
             >
               <button
@@ -156,7 +216,7 @@ const SignInPage = () => {
         <p className="mt-6 text-center text-sm text-gray-600">
           Don't have an account?{" "}
           <a
-            href="signup"
+            href="/signup"
             className="text-sky-600 hover:underline"
           >
             Sign up here
