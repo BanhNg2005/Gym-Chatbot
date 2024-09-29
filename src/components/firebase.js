@@ -3,8 +3,6 @@ import { getAnalytics } from 'firebase/analytics';
 import { getAuth, GoogleAuthProvider, FacebookAuthProvider, GithubAuthProvider } from 'firebase/auth';
 import 'firebase/auth'; // Import other Firebase services as needed
 
-console.log('API Key:', process.env.REACT_APP_API_KEY); // Add this line to verify
-
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_API_KEY,
   authDomain: process.env.REACT_APP_AUTH_DOMAIN,
