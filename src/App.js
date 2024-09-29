@@ -1,7 +1,7 @@
 // App.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import { FaInstagram, FaFacebook, FaGithub, FaSignInAlt, FaMoon, FaSun } from "react-icons/fa";
+import { FaInstagram, FaFacebook, FaGithub, FaSignInAlt, FaSignOutAlt, FaMoon, FaSun } from "react-icons/fa";
 import { IoMdFitness, IoMdNutrition } from "react-icons/io";
 import { FaBed } from "react-icons/fa";
 import { GiAchievement } from "react-icons/gi";
@@ -11,12 +11,23 @@ import SignInPage from "./components/login";
 import Workout from "./components/workout";
 import videoBg from "./homeBg.mp4";
 import './index.css';
+import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
 
 const HomePage = () => {
   const [chatMessage, setChatMessage] = useState("");
   const [chatHistory, setChatHistory] = useState([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const auth = getAuth();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+
+    return () => unsubscribe();
+  }, [auth]);
 
   const handleChatSubmit = (e) => {
     e.preventDefault();
@@ -81,12 +92,35 @@ const HomePage = () => {
                 </a>
               </li>
             </ul>
-            <Link to="/login">
-              <button className="mt-4 md:mt-0 ml-4 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition duration-300 flex items-center">
-                <FaSignInAlt className="mr-2" />
-                Sign In
-              </button>
-            </Link>
+            {user ? (
+  <>
+    <span className="mt-4 md:mt-0 ml-4 text-lg font-semibold">
+      {user.displayName || user.email}
+    </span>
+    <button
+      onClick={() => {
+        signOut(auth)
+          .then(() => {
+            console.log("User signed out");
+          })
+          .catch((error) => {
+            console.error("Error signing out:", error);
+          });
+      }}
+      className="mt-4 md:mt-0 ml-4 bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition duration-300 flex items-center"
+    >
+      <FaSignOutAlt className="mr-2" />
+      Sign Out
+    </button>
+  </>
+) : (
+  <Link to="/login">
+    <button className="mt-4 md:mt-0 ml-4 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition duration-300 flex items-center">
+      <FaSignInAlt className="mr-2" />
+      Sign In
+    </button>
+  </Link>
+)}
             <button
               onClick={toggleDarkMode}
               className="ml-4 p-2 rounded-full focus:outline-none transition-colors duration-200 ease-in-out"
@@ -112,12 +146,12 @@ const HomePage = () => {
             <h1 className="text-6xl font-bold mb-6 leading-tight">Transform Your Life with DREAMS Fitness</h1>
             <p className="text-2xl mb-8">Your journey to a healthier, stronger, and more confident you starts here.</p>
             <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-              <a href="#"
+              <Link to="/signup"
                  className="bg-blue-600 text-white hover:bg-blue-700 text-lg font-semibold py-3 px-8 rounded-full transition duration-300">Start
-                Your Journey</a>
-              <a href="#"
+                Your Journey</Link>
+              <Link to=""
                  className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-gray-800 text-lg font-semibold py-3 px-8 rounded-full transition duration-300">Learn
-                More</a>
+                More</Link>
             </div>
           </div>
         </section>
@@ -153,54 +187,54 @@ const HomePage = () => {
 
         <section className="mb-12">
           <h2 className="text-3xl font-semibold mb-6 text-center">Featured Content</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="flex flex-wrap justify-center gap-8">
             <div
-                className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300`}>
+              className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 w-64 h-auto`}>
               <img
-                  src={require('./home.jpg')}
-                  alt="Workout" className="w-full h-56 object-cover" />
-              <div className="p-6">
-                <h3 className="text-2xl font-semibold mb-3">Effective Workouts</h3>
-                <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>Discover our curated workout
+                src={require('./home.jpg')}
+                alt="Workout" className="w-full h-40 object-cover" />
+              <div className="p-5">
+                <h3 className="text-xl font-semibold mb-2">Effective Workouts</h3>
+                <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-3`}>Discover our curated workout
                   plans for all fitness levels, designed to help you achieve your goals efficiently.</p>
+                <Link to='/workout' className="text-blue-400 font-semibold hover:text-blue-300 transition duration-200">Learn
+                  More →</Link>
+              </div>
+            </div>
+            <div
+              className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 w-64 h-auto`}>
+              <img
+                src={require('./nutrition.jpg')}
+                alt="Nutrition" className="w-full h-40 object-cover"/>
+              <div className="p-5">
+                <h3 className="text-xl font-semibold mb-2">Balanced Nutrition</h3>
+                <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-3`}>Learn about proper nutrition to
+                  fuel your fitness journey and optimize your health and performance.</p>
                 <a href="#" className="text-blue-400 font-semibold hover:text-blue-300 transition duration-200">Learn
                   More →</a>
               </div>
             </div>
             <div
-                className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300`}>
+              className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 w-64 h-auto`}>
               <img
-                  src={require('./nutrition.jpg')}
-                  alt="Nutrition" className="w-full h-60 object-cover"/>
-              <div className="p-6">
-                <h3 className="text-2xl font-semibold mb-3">Balanced Nutrition</h3>
-                <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>Learn about proper nutrition to
-                  fuel your fitness journey and optimize your health and performance.</p>
-                <a href="#" className="text-blue-400 font-semibold hover:text-blue-300 transition duration-300">Learn
-                  More →</a>
-              </div>
-            </div>
-            <div
-                className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300`}>
-              <img
-                  src={require('./sleep.jpg')}
-                  alt="Sleep" className="w-full h-56 object-cover"/>
-              <div className="p-6">
-                <h3 className="text-2xl font-semibold mb-3">Quality Sleep</h3>
-                <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>Understand the importance of
+                src={require('./sleep.jpg')}
+                alt="Sleep" className="w-full h-40 object-cover"/>
+              <div className="p-5">
+                <h3 className="text-xl font-semibold mb-2">Quality Sleep</h3>
+                <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-3`}>Understand the importance of
                   sleep in your fitness routine and learn techniques for better rest and recovery.</p>
                 <a href="#" className="text-blue-400 font-semibold hover:text-blue-300 transition duration-200">Learn
                   More →</a>
               </div>
             </div>
             <div
-                className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300`}>
+              className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 w-64 h-auto`}>
               <img
-                  src={require('./achievement.jpg')}
-                  alt="Achievement" className="w-full h-56 object-cover"/>
-              <div className="p-6">
-                <h3 className="text-2xl font-semibold mb-3">Remarkable Achievements</h3>
-                <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-4`}>Celebrate your fitness milestones and get inspired by others' success stories.</p>
+                src={require('./achievement.jpg')}
+                alt="Achievement" className="w-full h-40 object-cover"/>
+              <div className="p-5">
+                <h3 className="text-xl font-semibold mb-2">Remarkable Achievements</h3>
+                <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-3`}>Celebrate your fitness milestones and get inspired by others' success stories.</p>
                 <a href="#" className="text-blue-400 font-semibold hover:text-blue-300 transition duration-200">Learn
                   More →</a>
               </div>
@@ -209,7 +243,7 @@ const HomePage = () => {
         </section>
       </main>
 
-      <footer className={`${isDarkMode ? 'bg-gray-800 text-white' : 'bg-gray-200 text-gray-900'} py-12`}>
+      <footer className={`${isDarkMode ? 'bg-gray-800 text-white' : 'bg-gray-200 text-gray-900'} py-10`}>
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-6 md:mb-0">
