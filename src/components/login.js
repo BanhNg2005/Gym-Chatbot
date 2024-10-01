@@ -59,7 +59,7 @@ const LoginForm = () => {
         }
         setIsSubmitted(true);
       } catch (error) {
-        setEmailOrPhoneError("Incorrect phone number. Please try again.");
+        setEmailOrPhoneError("Please type a correct email/phone number!");
       }
     }
   };
@@ -89,7 +89,11 @@ const LoginForm = () => {
       await signInWithPopup(auth, selectedProvider);
       setIsSubmitted(true);
     } catch (error) {
-      setEmailOrPhoneError(error.message);
+      if (error.code === 'auth/popup-closed-by-user') {
+        setEmailOrPhoneError("The authentication popup was closed before completing the sign-in process. Please try again.");
+      } else {
+        setEmailOrPhoneError(error.message);
+      }
     }
   };
 
