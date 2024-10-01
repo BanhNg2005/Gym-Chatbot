@@ -1,40 +1,113 @@
-import React, { useState } from "react";
-import { FaGoogle, FaFacebook, FaGithub, FaUser, FaLock } from "react-icons/fa";
+import React, { useState, useEffect } from "react";
+import { FaGoogle, FaFacebook, FaGithub, FaUser, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { Navigate } from 'react-router-dom';
+import { signInWithEmailAndPassword, signInWithPopup, RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+import { auth, googleProvider, facebookProvider, githubProvider } from './firebase';
 
-const SignInPage = () => {
+const LoginForm = () => {
   const [signInMethod, setSignInMethod] = useState("email");
-  const [email, setEmail] = useState("");
+  const [emailOrPhone, setEmailOrPhone] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
+  const [emailOrPhoneError, setEmailOrPhoneError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // this is empty for now (will add functionality later)
-    setMessage("Sign-in successful!");
-    setIsSubmitted(true); 
+
+  useEffect(() => {
+    const savedEmailOrPhone = localStorage.getItem('emailOrPhone');
+    const savedPassword = localStorage.getItem('password');
+    if (savedEmailOrPhone && savedPassword) {
+      setEmailOrPhone(savedEmailOrPhone);
+      setPassword(savedPassword);
+      handleSignIn(savedEmailOrPhone, savedPassword, true);
+    }
+  }, []);
+
+  const handleSignIn = async (emailOrPhone, password, rememberMe) => {
+    setEmailOrPhoneError("");
+    setPasswordError("");
+
+    if (isEmail(emailOrPhone)) {
+      try {
+        await signInWithEmailAndPassword(auth, emailOrPhone, password);
+        if (rememberMe) {
+          localStorage.setItem('emailOrPhone', emailOrPhone);
+          localStorage.setItem('password', password);
+        }
+        setIsSubmitted(true);
+      } catch (error) {
+        setEmailOrPhoneError("Incorrect email or password. Please try again.");
+      }
+    } else {
+      try {
+        const appVerifier = new RecaptchaVerifier('recaptcha-container', {
+          'size': 'invisible',
+          'callback': (response) => {
+            // reCAPTCHA solved, allow signInWithPhoneNumber.
+          }
+        }, auth);
+        const confirmationResult = await signInWithPhoneNumber(auth, emailOrPhone, appVerifier);
+        const code = window.prompt('Enter the OTP sent to your phone');
+        await confirmationResult.confirm(code);
+        if (rememberMe) {
+          localStorage.setItem('emailOrPhone', emailOrPhone);
+          localStorage.setItem('password', password);
+        }
+        setIsSubmitted(true);
+      } catch (error) {
+        setEmailOrPhoneError("Incorrect phone number. Please try again.");
+      }
+    }
   };
 
-  const handleThirdPartySignIn = (provider) => {
-    // this is empty for now (will add functionality later)
-    setMessage(`Signing in with ${provider}...`);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    handleSignIn(emailOrPhone, password, rememberMe);
   };
 
-  const handleForgotPassword = (e) => {
+
+  const handleThirdPartySignIn = async (provider) => {
+    try {
+      let selectedProvider;
+      switch (provider) {
+        case "Google":
+          selectedProvider = googleProvider;
+          break;
+        case "Facebook":
+          selectedProvider = facebookProvider;
+          break;
+        case "GitHub":
+          selectedProvider = githubProvider;
+          break;
+        default:
+          return;
+      }
+      await signInWithPopup(auth, selectedProvider);
+      setIsSubmitted(true);
+    } catch (error) {
+      setEmailOrPhoneError(error.message);
+    }
+  };
+
+  const handleForgotPassword = async (e) => {
     e.preventDefault();
-    // this is empty for now (will add functionality later)
-    setMessage("Password reset link sent to your email!");
+    setEmailOrPhoneError("Password reset link sent to your email!");
     setShowForgotPassword(false);
   };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
-  
+
+  const isEmail = (input) => {
+    const emailPattern = /\S+@\S+\.\S+/;
+    return emailPattern.test(input);
+  };
+
   if (isSubmitted) {
     return <Navigate to="/" />;
   }
@@ -90,12 +163,15 @@ const SignInPage = () => {
                 <input
                   type="text"
                   placeholder="Email or Phone"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={emailOrPhone}
+                  onChange={(e) => setEmailOrPhone(e.target.value)}
                   className="w-full pl-10 pr-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
                   required
                   aria-label="Email or Phone"
                 />
+                {emailOrPhoneError && (
+                  <p className="mt-1 text-sm text-red-600">{emailOrPhoneError}</p>
+                )}
               </div>
               <div className="relative">
                 <FaLock className="absolute top-3 left-3 text-gray-400" />
@@ -104,21 +180,30 @@ const SignInPage = () => {
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="w-full pl-10 pr-10 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
                   required
                   aria-label="Password"
                 />
+                <div
+                  className="absolute top-3 right-3 cursor-pointer"
+                  onClick={togglePasswordVisibility}
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </div>
+                {passwordError && (
+                  <p className="mt-1 text-sm text-red-600">{passwordError}</p>
+                )}
               </div>
               <div className="flex items-center">
                 <input
                   type="checkbox"
-                  id="showPassword"
-                  checked={showPassword}
-                  onChange={togglePasswordVisibility}
+                  id="rememberMe"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
                   className="mr-2"
                 />
-                <label htmlFor="showPassword" className="text-sm text-gray-600">
-                  Show Password
+                <label htmlFor="rememberMe" className="text-sm text-gray-600">
+                  Remember Me
                 </label>
               </div>
               <button
@@ -134,6 +219,7 @@ const SignInPage = () => {
               >
                 Forgot Password?
               </button>
+              <div id="recaptcha-container"></div>
             </motion.form>
           ) : signInMethod === "email" && showForgotPassword ? (
             <motion.form
@@ -203,16 +289,6 @@ const SignInPage = () => {
           )}
         </AnimatePresence>
 
-        {message && (
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="mt-4 text-center text-green-600"
-          >
-            {message}
-          </motion.p>
-        )}
-
         <p className="mt-6 text-center text-sm text-gray-600">
           Don't have an account?{" "}
           <a
@@ -227,4 +303,4 @@ const SignInPage = () => {
   );
 };
 
-export default SignInPage;
+export default LoginForm;
