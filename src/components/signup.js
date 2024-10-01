@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash, FaGoogle, FaFacebook, FaGithub } from "react-icons/fa";
 import { Navigate } from 'react-router-dom';
+import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { auth, googleProvider, facebookProvider, githubProvider } from './firebase';
 
 import '../index.css';
 
@@ -61,8 +63,7 @@ const SignUpForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setIsSubmitted(true);
-    
+
     const formFields = ["email", "phone", "password", "confirmPassword"];
     const newErrors = {};
 
@@ -74,16 +75,47 @@ const SignUpForm = () => {
     });
 
     if (Object.keys(newErrors).length === 0 && Object.values(errors).every(error => error === "")) {
-      console.log("Form submitted", formData);
-      setIsSubmitted(true);
+      // Sign up with Firebase
+      createUserWithEmailAndPassword(auth, formData.email, formData.password)
+        .then((userCredential) => {
+          console.log("Form submitted", userCredential.user);
+          setIsSubmitted(true);
+        })
+        .catch((error) => {
+          console.error("Error signing up:", error.message);
+          setErrors((prevErrors) => ({ ...prevErrors, email: error.message }));
+        });
     } else {
       setErrors(newErrors);
     }
   };
 
+  // const googleProvider = new GoogleAuthProvider();
+  // const googleBtn = () => {
+  //   signInWithPopup(auth, googleProvider)
+  //   .then ((result) => {
+  //     const userInfo = result.user;
+  //     console.log(userInfo);
+  //   })
+  //   .catch(err => console.log(err));
+  // }
+
   const handleThirdPartySignUp = (provider) => {
-    console.log(`Signing up with ${provider}`);
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        console.log(`Signed up with ${provider.providerId}`, result.user);
+        setIsSubmitted(true);
+      })
+      .catch((error) => {
+        if (error.code === 'auth/popup-closed-by-user') {
+          console.error('Popup closed by user');
+        } else {
+          console.error(`Error signing up with ${provider.providerId}:`, error.message);
+          setErrors((prevErrors) => ({ ...prevErrors, email: error.message }));
+        }
+      });
   };
+
   if (isSubmitted) {
     return <Navigate to="/" />;
   }
@@ -191,19 +223,19 @@ const SignUpForm = () => {
           </div>
           <div className="mt-6 grid grid-cols-3 gap-3">
             <button
-              onClick={() => handleThirdPartySignUp('Google')}
+              onClick={() => handleThirdPartySignUp(googleProvider)}
               className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
             >
               <FaGoogle className="text-red-500" />
             </button>
             <button
-              onClick={() => handleThirdPartySignUp('Facebook')}
+              onClick={() => handleThirdPartySignUp(facebookProvider)}
               className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
             >
               <FaFacebook className="text-blue-600" />
             </button>
             <button
-              onClick={() => handleThirdPartySignUp('Github')}
+              onClick={() => handleThirdPartySignUp(githubProvider)}
               className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
             >
               <FaGithub className="text-gray-900" />

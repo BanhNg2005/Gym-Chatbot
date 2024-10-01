@@ -1,9 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAnalytics } from 'firebase/analytics';
-import { getAuth, GoogleAuthProvider, FacebookAuthProvider, GithubAuthProvider } from 'firebase/auth';
-import 'firebase/auth'; // Import other Firebase services as needed
-
-console.log('API Key:', process.env.REACT_APP_API_KEY); // Add this line to verify
+import { getAuth, GoogleAuthProvider, FacebookAuthProvider, GithubAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_API_KEY,
@@ -25,4 +22,4 @@ const googleProvider = new GoogleAuthProvider();
 const facebookProvider = new FacebookAuthProvider();
 const githubProvider = new GithubAuthProvider();
 
-export { auth, analytics, googleProvider, facebookProvider, githubProvider };
+export { auth, analytics, googleProvider, facebookProvider, githubProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup };
