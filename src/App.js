@@ -63,7 +63,10 @@ const HomePage = () => {
       </style>
       <header className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} sticky top-0 left-0 w-full p-4 shadow-md z-50`}>
         <div className="container mx-auto flex justify-between items-center">
-          <a href="#" className="text-2xl font-bold">DREAMS</a>
+        <a href="/" className="text-2xl font-bold flex items-center">
+          <img src="/images/dreamslogo.png" alt="Dreams Logo" className="w-8 h-8 mr-2" />
+          DREAMS
+        </a>
           <div className="md:hidden">
             <button onClick={toggleMenu} className={`${isDarkMode ? 'text-white' : 'text-gray-900'} focus:outline-none`}>
               <FiMenu size={24} />
@@ -95,7 +98,7 @@ const HomePage = () => {
             {user ? (
               <>
                 <span className="mt-4 md:mt-0 ml-4 text-lg font-semibold">
-                  {user.displayName || user.email}
+                {`Hi, ${user.displayName || user.email}`}
                 </span>
                 <button
                   onClick={() => {
