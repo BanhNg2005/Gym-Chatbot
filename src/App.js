@@ -9,6 +9,7 @@ import { FiSend, FiMenu } from "react-icons/fi";
 import SignUpForm from "./components/signup";
 import SignInPage from "./components/login";
 import Workout from "./components/workout";
+import NutritionDashboard from "./components/nutrition";
 import videoBg from "./homeBg.mp4";
 import './index.css';
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
@@ -80,7 +81,7 @@ const HomePage = () => {
                 </Link>
               </li>
               <li>
-                <a href="#" className={`hover:text-blue-400 flex items-center ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                <a href="/nutrition" className={`hover:text-blue-400 flex items-center ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                   <IoMdNutrition className="mr-1" /> Nutrition
                 </a>
               </li>
@@ -287,7 +288,7 @@ const App = () => {
         <Route path="/signup" element={<SignUpForm />} />
         <Route path="/login" element={<SignInPage />} />
         <Route path="/sleep" element={<h1>Sleep</h1>} />
-        <Route path="/nutrition" element={<h1>Nutrition</h1>} />
+        <Route path="/nutrition" element={<NutritionDashboard/>} />
         <Route path="/workout" element={<Workout />} />
         <Route path="/achievement" element={<h1>Achievement</h1>} />
       </Routes>
