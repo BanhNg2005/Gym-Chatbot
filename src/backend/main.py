@@ -1,38 +1,47 @@
 import os
-import google.generativeai as genai
-from dotenv import load_dotenv
-import requests
-import json
+from flask import Flask, request, jsonify, send_from_directory
 
-def configure() -> None:
+def configure():
+    from dotenv import load_dotenv
     load_dotenv()
 
-# Call the configure function to load the environment variables
 configure()
 
-# Get the API key from environment variables
+# get the API key from environment variables
 api_key = os.getenv("API_KEY")
 api_url = f'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={api_key}'
 
-# Define the headers and data for the POST request
+# define the headers for the POST request
 headers = {
     'Content-Type': 'application/json'
 }
-data = {
-    "contents": [
-        {
-            "parts": [
-                {
-                    "text": "Explain how AI works"
-                }
-            ]
-        }
-    ]
-}
 
-# Send the POST request
-response = requests.post(api_url, headers=headers, data=json.dumps(data))
+app = Flask(__name__)
 
-# Print the response status code and content
-print(f'Status Code: {response.status_code}')
-print(f'Response Content: {response.content.decode()}')
+@app.route('/', methods=['GET'])
+def home():
+    return "Welcome to the Chatbot API"
+
+@app.route('/chat', methods=['POST'])
+def chat():
+    user_message = request.json.get('message')
+    data = {
+        "contents": [
+            {
+                "parts": [
+                    {
+                        "text": user_message
+                    }
+                ]
+            }
+        ]
+    }
+    return jsonify({"reply": "This is a placeholder response"})
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+if __name__ == '__main__':
+    app.run(debug=True)
