@@ -1,4 +1,3 @@
-// App.js
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { FaInstagram, FaFacebook, FaGithub, FaSignInAlt, FaSignOutAlt, FaMoon, FaSun } from "react-icons/fa";
@@ -30,16 +29,26 @@ const HomePage = () => {
     return () => unsubscribe();
   }, [auth]);
 
-  const handleChatSubmit = (e) => {
+  const handleChatSubmit = async (e) => {
     e.preventDefault();
     if (chatMessage.trim() !== "") {
       setChatHistory([...chatHistory, { type: "user", message: chatMessage }]);
-      setTimeout(() => {
-        setChatHistory((prev) => [
-          ...prev,
-          { type: "bot", message: "Thank you for your message. How can I assist you with your fitness journey today?" },
-        ]);
-      }, 1000);
+      try {
+        const response = await fetch('http://localhost:5000/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ message: chatMessage }),
+        });
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        setChatHistory([...chatHistory, { type: "user", message: chatMessage }, { type: "bot", message: data.reply }]);
+      } catch (error) {
+        console.error('Error fetching API:', error);
+      }
       setChatMessage("");
     }
   };
@@ -162,33 +171,33 @@ const HomePage = () => {
         </section>
 
         <section className="mt-36 mb-12">
-          <h2 className="text-3xl font-semibold mb-6 text-center">Chatbot Assistant</h2>
-          <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} p-6 rounded-lg shadow-lg max-w-2xl mx-auto`}>
-            <div className={`h-80 overflow-y-auto mb-4 p-4 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'} rounded-lg`}>
-              {chatHistory.map((chat, index) => (
-                <div key={index} className={`mb-4 ${chat.type === "user" ? "text-right" : "text-left"}`}>
-                  <span
-                    className={`inline-block p-3 rounded-lg ${chat.type === "user" ? "bg-blue-600 text-white" : isDarkMode ? "bg-gray-600 text-white" : "bg-gray-300 text-gray-900"}`}>
-                    {chat.message}
-                  </span>
-                </div>
-              ))}
+      <h2 className="text-3xl font-semibold mb-6 text-center">Chatbot Assistant</h2>
+      <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} p-6 rounded-lg shadow-lg max-w-2xl mx-auto`}>
+        <div className={`h-80 overflow-y-auto mb-4 p-4 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'} rounded-lg`}>
+          {chatHistory.map((chat, index) => (
+            <div key={index} className={`mb-4 ${chat.type === "user" ? "text-right" : "text-left"}`}>
+              <span
+                className={`inline-block p-3 rounded-lg ${chat.type === "user" ? "bg-blue-600 text-white" : isDarkMode ? "bg-gray-600 text-white" : "bg-gray-300 text-gray-900"}`}>
+                {chat.message}
+              </span>
             </div>
-            <form onSubmit={handleChatSubmit} className="flex">
-              <input
-                type="text"
-                value={chatMessage}
-                onChange={(e) => setChatMessage(e.target.value)}
-                placeholder="Ask me anything about fitness..."
-                className={`flex-grow p-3 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-600 ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'}`}
-              />
-              <button type="submit"
-                      className="bg-blue-600 text-white p-3 rounded-r-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 transition duration-300">
-                <FiSend size={24}/>
-              </button>
-            </form>
-          </div>
-        </section>
+          ))}
+        </div>
+        <form onSubmit={handleChatSubmit} className="flex">
+          <input
+            type="text"
+            value={chatMessage}
+            onChange={(e) => setChatMessage(e.target.value)}
+            placeholder="Ask me anything about fitness..."
+            className={`flex-grow p-3 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-600 ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'}`}
+          />
+          <button type="submit"
+                  className="bg-blue-600 text-white p-3 rounded-r-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 transition duration-300">
+            <FiSend size={24}/>
+          </button>
+        </form>
+      </div>
+    </section>
 
         <section id="featured-content" className="mt-24 ">
           <h2 className="text-3xl font-semibold mb-6 text-center">Featured Content</h2>
