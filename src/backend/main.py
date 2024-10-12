@@ -1,22 +1,25 @@
 import os
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import google.generativeai as genai
+from dotenv import load_dotenv
 
-def configure():
-    from dotenv import load_dotenv
-    load_dotenv()
-
-configure()
-
-# get the API key from environment variables
-api_key = os.getenv("API_KEY")
-api_url = f'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={api_key}'
-
-# define the headers for the POST request
-headers = {
-    'Content-Type': 'application/json'
-}
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
+
+# Get the API key from environment variables
+api_key = os.getenv("API_KEY")
+if not api_key:
+    raise ValueError("No API key found. Please set the API_KEY environment variable.")
+
+# Configure the API key for google.generativeai
+genai.configure(api_key=api_key)
+
+# Create a model instance
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 @app.route('/', methods=['GET'])
 def home():
@@ -24,24 +27,19 @@ def home():
 
 @app.route('/chat', methods=['POST'])
 def chat():
-    user_message = request.json.get('message')
-    data = {
-        "contents": [
-            {
-                "parts": [
-                    {
-                        "text": user_message
-                    }
-                ]
-            }
-        ]
-    }
-    return jsonify({"reply": "This is a placeholder response"})
+    try:
+        user_message = request.json.get('message')
+        if not user_message:
+            return jsonify({"error": "No message provided"}), 400
 
-@app.route('/favicon.ico')
-def favicon():
-    return send_from_directory(os.path.join(app.root_path, 'static'),
-                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
+        # Generate content using the google.generativeai library
+        response = model.generate_content(user_message)
+        chatbot_response = response.text
+
+        return jsonify({"response": chatbot_response})
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
