@@ -34,7 +34,7 @@ const HomePage = () => {
     if (chatMessage.trim() !== "") {
       setChatHistory([...chatHistory, { type: "user", message: chatMessage }]);
       try {
-        const response = await fetch('http://localhost:5000/chat', {
+        const response = await fetch('http://localhost:5000/chat', { 
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -45,7 +45,8 @@ const HomePage = () => {
           throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        setChatHistory([...chatHistory, { type: "user", message: chatMessage }, { type: "bot", message: data.reply }]);
+        console.log("API response:", data);  // Debugging statement
+        setChatHistory([...chatHistory, { type: "user", message: chatMessage }, { type: "bot", message: data.response }]);
       } catch (error) {
         console.error('Error fetching API:', error);
       }
@@ -192,8 +193,8 @@ const HomePage = () => {
             className={`flex-grow p-3 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-600 ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'}`}
           />
           <button type="submit"
-                  className="bg-blue-600 text-white p-3 rounded-r-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 transition duration-300">
-            <FiSend size={24}/>
+            className="bg-blue-600 text-white p-3 rounded-r-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 transition duration-300">
+            <FiSend size={24} />
           </button>
         </form>
       </div>
