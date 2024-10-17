@@ -88,7 +88,7 @@ const Workout = () => {
                 </Link>
               </li>
               <li>
-                <a href="#" className={`hover:text-blue-400 flex items-center ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                <a href="/nutrition" className={`hover:text-blue-400 flex items-center ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                   <IoMdNutrition className="mr-1" /> Nutrition
                 </a>
               </li>
