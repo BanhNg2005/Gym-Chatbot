@@ -12,6 +12,8 @@ import NutritionDashboard from "./components/nutrition";
 import videoBg from "./homeBg.mp4";
 import './index.css';
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
+import { database } from "./components/firebase";
+import { collection, addDoc } from "firebase/firestore";
 
 const HomePage = () => {
   const [chatMessage, setChatMessage] = useState("");
@@ -20,6 +22,7 @@ const HomePage = () => {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const auth = getAuth();
   const [user, setUser] = useState(null);
+  const collectionRef = collection(database, "chat");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -30,6 +33,8 @@ const HomePage = () => {
   }, [auth]);
 
   const handleChatSubmit = async (e) => {
+    addDoc(collectionRef, { message: chatMessage });
+
     e.preventDefault();
     if (chatMessage.trim() !== "") {
       setChatHistory([...chatHistory, { type: "user", message: chatMessage }]);
