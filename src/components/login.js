@@ -2,7 +2,13 @@ import React, { useState, useEffect } from "react";
 import { FaGoogle, FaFacebook, FaGithub, FaUser, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { Navigate } from 'react-router-dom';
-import { signInWithEmailAndPassword, signInWithPopup, RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  sendPasswordResetEmail
+} from "firebase/auth";
 import { auth, googleProvider, facebookProvider, githubProvider } from './firebase';
 
 const LoginForm = () => {
@@ -15,7 +21,9 @@ const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-
+  const [resetEmailError, setResetEmailError] = useState("");
+  const [resetEmailSuccess, setResetEmailSuccess] = useState("");
+  const [resetEmail, setResetEmail] = useState("");
 
   useEffect(() => {
     const savedEmailOrPhone = localStorage.getItem('emailOrPhone');
@@ -27,16 +35,23 @@ const LoginForm = () => {
     }
   }, []);
 
-  const handleSignIn = async (emailOrPhone, password, rememberMe) => {
+  const isEmail = (input) => {
+    const emailPattern = /^\S+@\S+\.\S+$/;
+    return emailPattern.test(input);
+  };
+
+  const handleSignIn = async (emailOrPhoneInput, passwordInput, remember) => {
     setEmailOrPhoneError("");
     setPasswordError("");
 
-    if (isEmail(emailOrPhone)) {
+    if (isEmail(emailOrPhoneInput)) {
       try {
-        await signInWithEmailAndPassword(auth, emailOrPhone, password);
-        if (rememberMe) {
-          localStorage.setItem('emailOrPhone', emailOrPhone);
-          localStorage.setItem('password', password);
+        await signInWithEmailAndPassword(auth, emailOrPhoneInput, passwordInput);
+        if (remember) {
+          localStorage.setItem('emailOrPhone', emailOrPhoneInput);
+          // Warning: Storing passwords in localStorage is not secure.
+          // Consider using more secure methods like sessionStorage or secure HTTP-only cookies.
+          localStorage.setItem('password', passwordInput);
         }
         setIsSubmitted(true);
       } catch (error) {
@@ -50,16 +65,44 @@ const LoginForm = () => {
             // reCAPTCHA solved, allow signInWithPhoneNumber.
           }
         }, auth);
-        const confirmationResult = await signInWithPhoneNumber(auth, emailOrPhone, appVerifier);
+        const confirmationResult = await signInWithPhoneNumber(auth, emailOrPhoneInput, appVerifier);
         const code = window.prompt('Enter the OTP sent to your phone');
-        await confirmationResult.confirm(code);
-        if (rememberMe) {
-          localStorage.setItem('emailOrPhone', emailOrPhone);
-          localStorage.setItem('password', password);
+        if (code) {
+          await confirmationResult.confirm(code);
+          if (remember) {
+            localStorage.setItem('emailOrPhone', emailOrPhoneInput);
+            localStorage.setItem('password', passwordInput); // Although password may not be applicable for phone auth
+          }
+          setIsSubmitted(true);
+        } else {
+          setEmailOrPhoneError("OTP verification failed. Please try again.");
         }
-        setIsSubmitted(true);
       } catch (error) {
         setEmailOrPhoneError("Please type a correct email/phone number!");
+      }
+    }
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    setResetEmailError("");
+    setResetEmailSuccess("");
+
+    const emailPattern = /^\S+@\S+\.\S+$/;
+    if (!emailPattern.test(resetEmail)) {
+      setResetEmailError("Please enter a valid email address.");
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, resetEmail);
+      setResetEmailSuccess("If an account exists with that email, a password reset link has been sent.");
+    } catch (error) {
+      console.error("Error sending password reset email:", error);
+      if (error.code === 'auth/invalid-email') {
+        setResetEmailError("Please enter a valid email address.");
+      } else {
+        setResetEmailError("Error sending reset email. Please try again.");
       }
     }
   };
@@ -68,7 +111,6 @@ const LoginForm = () => {
     e.preventDefault();
     handleSignIn(emailOrPhone, password, rememberMe);
   };
-
 
   const handleThirdPartySignIn = async (provider) => {
     try {
@@ -97,19 +139,8 @@ const LoginForm = () => {
     }
   };
 
-  const handleForgotPassword = async (e) => {
-    e.preventDefault();
-    setEmailOrPhoneError("Password reset link sent to your email!");
-    setShowForgotPassword(false);
-  };
-
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
-  };
-
-  const isEmail = (input) => {
-    const emailPattern = /\S+@\S+\.\S+/;
-    return emailPattern.test(input);
   };
 
   if (isSubmitted) {
@@ -131,21 +162,19 @@ const LoginForm = () => {
         <div className="flex justify-center space-x-4 mb-6">
           <button
             onClick={() => setSignInMethod("email")}
-            className={`px-4 py-2 rounded-full ${
-              signInMethod === "email"
+            className={`px-4 py-2 rounded-full ${signInMethod === "email"
                 ? "bg-sky-600 text-white"
                 : "bg-gray-200 text-gray-700"
-            } transition-colors duration-300`}
+              } transition-colors duration-300`}
           >
             Email/Phone
           </button>
           <button
             onClick={() => setSignInMethod("thirdParty")}
-            className={`px-4 py-2 rounded-full ${
-              signInMethod === "thirdParty"
+            className={`px-4 py-2 rounded-full ${signInMethod === "thirdParty"
                 ? "bg-sky-600 text-white"
                 : "bg-gray-200 text-gray-700"
-            } transition-colors duration-300`}
+              } transition-colors duration-300`}
           >
             Third-Party
           </button>
@@ -232,7 +261,7 @@ const LoginForm = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -50 }}
               transition={{ duration: 0.3 }}
-              onSubmit={handleForgotPassword}
+              onSubmit={handleResetPassword}
               className="space-y-4"
             >
               <div className="relative">
@@ -240,10 +269,17 @@ const LoginForm = () => {
                 <input
                   type="email"
                   placeholder="Enter your email"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
                   className="w-full pl-10 pr-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
                   required
                   aria-label="Email for password reset"
                 />
+                {(resetEmailError || resetEmailSuccess) && (
+                  <p className={`mt-1 text-sm ${resetEmailError ? 'text-red-600' : 'text-green-600'}`}>
+                    {resetEmailError || resetEmailSuccess}
+                  </p>
+                )}
               </div>
               <button
                 type="submit"
@@ -253,7 +289,7 @@ const LoginForm = () => {
               </button>
               <button
                 type="button"
-                onClick={() => setShowForgotPassword(false)}
+                onClick={() => { setShowForgotPassword(false); setResetEmailError(""); setResetEmailSuccess(""); }}
                 className="w-full text-sky-600 text-sm hover:underline"
               >
                 Back to Sign In
