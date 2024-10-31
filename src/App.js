@@ -14,6 +14,8 @@ import './index.css';
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
 import { database } from "./components/firebase";
 import { collection, addDoc } from "firebase/firestore";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const HomePage = () => {
   const [chatMessage, setChatMessage] = useState("");
@@ -22,6 +24,7 @@ const HomePage = () => {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const auth = getAuth();
   const [user, setUser] = useState(null);
+
   const collectionRef = collection(database, "chat");
 
   useEffect(() => {
@@ -33,30 +36,61 @@ const HomePage = () => {
   }, [auth]);
 
   const handleChatSubmit = async (e) => {
-    addDoc(collectionRef, { message: chatMessage });
-
-    e.preventDefault();
-    if (chatMessage.trim() !== "") {
-      setChatHistory([...chatHistory, { type: "user", message: chatMessage }]);
-      try {
-        const response = await fetch('http://localhost:5000/chat', { 
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ message: chatMessage }),
-        });
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        const data = await response.json();
-        console.log("API response:", data);  // Debugging statement
-        setChatHistory([...chatHistory, { type: "user", message: chatMessage }, { type: "bot", message: data.response }]);
-      } catch (error) {
-        console.error('Error fetching API:', error);
-      }
-      setChatMessage("");
+    e.preventDefault(); // Prevent the default form submission behavior
+  
+    if (chatMessage.trim() === "") {
+      toast.error("Please enter a message before sending.");
+      return;
     }
+  
+    if (!user) {
+      toast.error("You need to login first to send message.");
+      return;
+    }
+  
+    const messageData = {
+      message: chatMessage,
+      userId: user.uid, // Associate message with the current user
+      timestamp: new Date(),
+    };
+  
+    try {
+      // Save the user's message to Firestore under their specific collection
+      const docRef = await addDoc(collection(database, `users/${user.uid}/chats`), messageData);
+      console.log("Chat message saved with ID:", docRef.id);  
+      // Update chat history with the user's message
+      setChatHistory((prevHistory) => [
+        ...prevHistory,
+        { type: "user", message: chatMessage },
+      ]);
+  
+      // Send the message to the chatbot API
+      const response = await fetch('http://localhost:5000/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: chatMessage, userId: user.uid }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+  
+      const data = await response.json();  
+      // Update chat history with the bot's response
+      setChatHistory((prevHistory) => [
+        ...prevHistory,
+        { type: "user", message: chatMessage },
+        { type: "bot", message: data.response },
+      ]);
+    } catch (error) {
+      console.error('Error submitting chat:', error);
+      toast.error('Error submitting chat: ' + error.message);
+    }
+  
+    // Clear the chat input field
+    setChatMessage("");
   };
 
   const toggleMenu = () => {
@@ -69,6 +103,17 @@ const HomePage = () => {
 
   return (
     <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
       <style>
         {`
           @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
@@ -79,10 +124,10 @@ const HomePage = () => {
       </style>
       <header className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} sticky top-0 left-0 w-full p-4 shadow-md z-50`}>
         <div className="container mx-auto flex justify-between items-center">
-        <a href="/" className="text-2xl font-bold flex items-center">
-          <img src="/images/dreamslogo.png" alt="Dreams Logo" className="w-8 h-8 mr-2" />
-          DREAMS
-        </a>
+          <a href="/" className="text-2xl font-bold flex items-center">
+            <img src="/images/dreamslogo.png" alt="Dreams Logo" className="w-8 h-8 mr-2" />
+            DREAMS
+          </a>
           <div className="md:hidden">
             <button onClick={toggleMenu} className={`${isDarkMode ? 'text-white' : 'text-gray-900'} focus:outline-none`}>
               <FiMenu size={24} />
@@ -114,7 +159,7 @@ const HomePage = () => {
             {user ? (
               <>
                 <span className="mt-4 md:mt-0 ml-4 text-lg font-semibold">
-                {`Hi, ${user.displayName || user.email}`}
+                  {`Hi, ${user.displayName || user.email}`}
                 </span>
                 <button
                   onClick={() => {
@@ -157,7 +202,7 @@ const HomePage = () => {
         <section className="mb-12 relative overflow-hidden rounded-lg bg-gray-800 text-white py-20">
           <div className="absolute inset-0 overflow-hidden">
             <video autoPlay loop muted className="w-full h-full object-cover opacity-50">
-              <source src={videoBg} autoPlay loop muted/>
+              <source src={videoBg} autoPlay loop muted />
               Your browser does not support the video tag.
             </video>
           </div>
@@ -166,44 +211,44 @@ const HomePage = () => {
             <p className="text-2xl mb-8">Your journey to a healthier, stronger, and more confident you starts here.</p>
             <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
               <Link to="/signup"
-                 className="bg-blue-600 text-white hover:bg-blue-700 text-lg font-semibold py-3 px-8 rounded-full transition duration-300">Start
+                className="bg-blue-600 text-white hover:bg-blue-700 text-lg font-semibold py-3 px-8 rounded-full transition duration-300">Start
                 Your Journey</Link>
               <a href="#featured-content"
-              className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-gray-800 text-lg font-semibold py-3 px-8 rounded-full transition duration-300">
-              Learn More
+                className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-gray-800 text-lg font-semibold py-3 px-8 rounded-full transition duration-300">
+                Learn More
               </a>
             </div>
           </div>
         </section>
 
         <section className="mt-36 mb-12">
-      <h2 className="text-3xl font-semibold mb-6 text-center">Chatbot Assistant</h2>
-      <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} p-6 rounded-lg shadow-lg max-w-2xl mx-auto`}>
-        <div className={`h-80 overflow-y-auto mb-4 p-4 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'} rounded-lg`}>
-          {chatHistory.map((chat, index) => (
-            <div key={index} className={`mb-4 ${chat.type === "user" ? "text-right" : "text-left"}`}>
-              <span
-                className={`inline-block p-3 rounded-lg ${chat.type === "user" ? "bg-blue-600 text-white" : isDarkMode ? "bg-gray-600 text-white" : "bg-gray-300 text-gray-900"}`}>
-                {chat.message}
-              </span>
+          <h2 className="text-3xl font-semibold mb-6 text-center">Chatbot Assistant</h2>
+          <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} p-6 rounded-lg shadow-lg max-w-2xl mx-auto`}>
+            <div className={`h-80 overflow-y-auto mb-4 p-4 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'} rounded-lg`}>
+              {chatHistory.map((chat, index) => (
+                <div key={index} className={`mb-4 ${chat.type === "user" ? "text-right" : "text-left"}`}>
+                  <span
+                    className={`inline-block p-3 rounded-lg ${chat.type === "user" ? "bg-blue-600 text-white" : isDarkMode ? "bg-gray-600 text-white" : "bg-gray-300 text-gray-900"}`}>
+                    {chat.message}
+                  </span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <form onSubmit={handleChatSubmit} className="flex">
-          <input
-            type="text"
-            value={chatMessage}
-            onChange={(e) => setChatMessage(e.target.value)}
-            placeholder="Ask me anything about fitness..."
-            className={`flex-grow p-3 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-600 ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'}`}
-          />
-          <button type="submit"
-            className="bg-blue-600 text-white p-3 rounded-r-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 transition duration-300">
-            <FiSend size={24} />
-          </button>
-        </form>
-      </div>
-    </section>
+            <form onSubmit={handleChatSubmit} className="flex">
+              <input
+                type="text"
+                value={chatMessage}
+                onChange={(e) => setChatMessage(e.target.value)}
+                placeholder="Ask me anything about fitness..."
+                className={`flex-grow p-3 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-600 ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'}`}
+              />
+              <button type="submit"
+                className="bg-blue-600 text-white p-3 rounded-r-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 transition duration-300">
+                <FiSend size={24} />
+              </button>
+            </form>
+          </div>
+        </section>
 
         <section id="featured-content" className="mt-24 ">
           <h2 className="text-3xl font-semibold mb-6 text-center">Featured Content</h2>
@@ -225,12 +270,12 @@ const HomePage = () => {
               className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 w-64 h-auto`}>
               <img
                 src={require('./nutrition.jpg')}
-                alt="Nutrition" className="w-full h-40 object-cover"/>
+                alt="Nutrition" className="w-full h-40 object-cover" />
               <div className="p-5">
                 <h3 className="text-xl font-semibold mb-2">Balanced Nutrition</h3>
                 <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-3`}>Learn about proper nutrition to
                   fuel your fitness journey and optimize your health and performance.</p>
-                <a href="#" className="text-blue-400 font-semibold hover:text-blue-300 transition duration-200">Learn
+                <a href="/nutrition" className="text-blue-400 font-semibold hover:text-blue-300 transition duration-200">Learn
                   More →</a>
               </div>
             </div>
@@ -238,7 +283,7 @@ const HomePage = () => {
               className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 w-64 h-auto`}>
               <img
                 src={require('./sleep.jpg')}
-                alt="Sleep" className="w-full h-40 object-cover"/>
+                alt="Sleep" className="w-full h-40 object-cover" />
               <div className="p-5">
                 <h3 className="text-xl font-semibold mb-2">Quality Sleep</h3>
                 <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-3`}>Understand the importance of
@@ -251,7 +296,7 @@ const HomePage = () => {
               className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 w-64 h-auto`}>
               <img
                 src={require('./achievement.jpg')}
-                alt="Achievement" className="w-full h-40 object-cover"/>
+                alt="Achievement" className="w-full h-40 object-cover" />
               <div className="p-5">
                 <h3 className="text-xl font-semibold mb-2">Remarkable Achievements</h3>
                 <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-3`}>Celebrate your fitness milestones and get inspired by others' success stories.</p>
@@ -273,15 +318,15 @@ const HomePage = () => {
             <div className="flex items-center space-x-4">
               <span className="text-lg">Follow us:</span>
               <a href="https://www.instagram.com/banh_ng05/?hl=en" target="_blank" rel="noopener noreferrer"
-                 className="text-blue-400 hover:text-blue-300 transition duration-300">
+                className="text-blue-400 hover:text-blue-300 transition duration-300">
                 <FaInstagram size={28} />
               </a>
               <a href="https://www.facebook.com/nguyen.banh.9" target="_blank" rel="noopener noreferrer"
-                 className="text-blue-400 hover:text-blue-300 transition duration-300">
+                className="text-blue-400 hover:text-blue-300 transition duration-300">
                 <FaFacebook size={28} />
               </a>
               <a href="https://github.com/BanhNg2005" target="_blank" rel="noopener noreferrer"
-                 className="text-blue-400 hover:text-blue-300 transition duration-300">
+                className="text-blue-400 hover:text-blue-300 transition duration-300">
                 <FaGithub size={28} />
               </a>
             </div>
@@ -303,7 +348,7 @@ const App = () => {
         <Route path="/signup" element={<SignUpForm />} />
         <Route path="/login" element={<SignInPage />} />
         <Route path="/sleep" element={<h1>Sleep</h1>} />
-        <Route path="/nutrition" element={<NutritionDashboard/>} />
+        <Route path="/nutrition" element={<NutritionDashboard />} />
         <Route path="/workout" element={<Workout />} />
         <Route path="/achievement" element={<h1>Achievement</h1>} />
       </Routes>
