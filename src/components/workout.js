@@ -9,6 +9,8 @@ import { auth } from './firebase';
 import { signOut, onAuthStateChanged } from "firebase/auth";
 import { database } from "./firebase";
 import { collection, addDoc } from "firebase/firestore";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Workout = () => {
   const [activeTab, setActiveTab] = useState("create");
@@ -35,49 +37,49 @@ const Workout = () => {
     setWorkoutPlan(plan);
     try {
       if (!user) {
-        throw new Error("User is not authenticated");
+        throw new Error("User is not authenticated! Please sign in to save your workout plan.");
       }
       const docRef = await addDoc(collection(database, `users/${user.uid}/workoutPlans`), plan);
       console.log("Workout plan saved with ID: ", docRef.id);
-      alert("Workout plan saved successfully!");
+      toast.success("Workout plan saved successfully!");
     } catch (error) {
       console.error("Error saving workout plan: ", error);
-      alert('Error creating workout plan: ' + error.message);
+      toast.error('Error creating workout plan: ' + error.message);
     }
   };
 
   const handleAdjustWorkout = async (feedback) => {
     try {
       if (!user) {
-        throw new Error("User is not authenticated");
+        throw new Error("User is not authenticated! Please sign in to adjust your workout.");
       }
       const docRef = await addDoc(collection(database, `users/${user.uid}/workoutAdjustments`), feedback);
       console.log("Workout adjustment saved with ID: ", docRef.id);
-      alert('Workout adjusted successfully!');
+      toast.success('Workout adjusted successfully!');
     } catch (error) {
       console.error("Error saving workout adjustment: ", error);
-      alert('Error adjusting workout: ' + error.message);
+      toast.error('Error adjusting workout: ' + error.message);
     }
   };
 
   const handleSetRestDay = async (days) => {
     try {
       if (!user) {
-        throw new Error("User is not authenticated");
+        throw new Error("User is not authenticated! Please sign in to set your rest days.");
       }
       const docRef = await addDoc(collection(database, `users/${user.uid}/restDays`), { days });
       console.log("Rest days saved with ID: ", docRef.id);
-      alert('Rest days set successfully!');
+      toast.success('Rest days set successfully!');
     } catch (error) {
       console.error("Error saving rest days: ", error);
-      alert('Error setting rest days: ' + error.message);
+      toast.error('Error setting rest days: ' + error.message);
     }
   };
 
   const handleExerciseVariation = async (exerciseName, variationName) => {
     try {
       if (!user) {
-        throw new Error("User is not authenticated");
+        throw new Error("User is not authenticated! Please sign in to select exercise variations.");
       }
       const data = {
         exercise: exerciseName,
@@ -89,12 +91,12 @@ const Workout = () => {
         data
       );
       console.log("Exercise variation saved with ID: ", docRef.id);
-      alert(
+      toast.success(
         `Selected variation "${variationName}" for "${exerciseName}".`
       );
     } catch (error) {
       console.error("Error saving exercise variation: ", error);
-      alert("Error selecting exercise variation: " + error.message);
+      toast.error("Error selecting exercise variation: " + error.message);
     }
   };
 
@@ -108,6 +110,17 @@ const Workout = () => {
 
   return (
     <div className={`min-h-screen ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"}`}>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
       <style>
         {`
           @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
