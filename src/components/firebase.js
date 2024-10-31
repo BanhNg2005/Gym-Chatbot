@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAnalytics } from 'firebase/analytics';
 import { getAuth, GoogleAuthProvider, FacebookAuthProvider, GithubAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
-
+import { getFirestore } from 'firebase/firestore';
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_API_KEY,
   authDomain: process.env.REACT_APP_AUTH_DOMAIN,
@@ -23,3 +23,4 @@ const facebookProvider = new FacebookAuthProvider();
 const githubProvider = new GithubAuthProvider();
 
 export { auth, analytics, googleProvider, facebookProvider, githubProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup };
+export const database = getFirestore(app);
