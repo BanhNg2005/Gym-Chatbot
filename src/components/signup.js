@@ -211,6 +211,7 @@ const SignUpForm = () => {
           >
             Sign Up
           </button>
+          <p className="mt-2 text-sm text-center text-gray-600">Already have an account? <a href="/login" className="text-sky-600 hover:underline">Log in</a></p>
         </form>
         <div className="mt-8">
           <div className="relative">
