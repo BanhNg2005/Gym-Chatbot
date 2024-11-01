@@ -121,9 +121,9 @@ const SignUpForm = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 to-blue-200 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-sky-300 to-sky-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
-      <h2 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-purple-400 to-blue-600 bg-clip-text text-transparent leading-tight pb-2">Sign Up</h2>
+      <h2 className="text-3xl font-bold text-center mb-6 text-sky-700">Sign Up</h2>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -207,10 +207,11 @@ const SignUpForm = () => {
           </div>
           <button
             type="submit"
-            className="w-full py-3 px-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out"
+            className="w-full bg-sky-600 text-white py-2 rounded-md hover:bg-sky-700 transition-colors duration-300"
           >
             Sign Up
           </button>
+          <p className="mt-2 text-sm text-center text-gray-600">Already have an account? <a href="/login" className="text-sky-600 hover:underline">Log in</a></p>
         </form>
         <div className="mt-8">
           <div className="relative">

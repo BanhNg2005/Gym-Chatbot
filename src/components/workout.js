@@ -5,16 +5,20 @@ import { FaSignInAlt, FaMoon, FaSun } from "react-icons/fa";
 import { IoMdFitness, IoMdNutrition } from "react-icons/io";
 import { GiAchievement } from "react-icons/gi";
 import { FiMenu } from "react-icons/fi";
-import { auth } from './firebase'; 
+import { auth } from './firebase';
 import { signOut, onAuthStateChanged } from "firebase/auth";
+import { database } from "./firebase";
+import { collection, addDoc } from "firebase/firestore";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Workout = () => {
   const [activeTab, setActiveTab] = useState("create");
   const [workoutPlan, setWorkoutPlan] = useState({});
-  const [workoutHistory, setWorkoutHistory] = useState([]);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const collectionRef = collection(database, "workoutHistory");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -22,33 +26,80 @@ const Workout = () => {
     });
 
     return () => unsubscribe();
-  }, [auth]);
+  }, []);
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
   };
 
-  const handleCreateWorkout = (plan) => {
+  // Handler functions
+  const handleCreateWorkout = async (plan) => {
     setWorkoutPlan(plan);
-    // this is empty for now (will add functionality later)
+    try {
+      if (!user) {
+        throw new Error("User is not authenticated! Please sign in to save your workout plan.");
+      }
+      const docRef = await addDoc(collection(database, `users/${user.uid}/workoutPlans`), plan);
+      console.log("Workout plan saved with ID: ", docRef.id);
+      toast.success("Workout plan saved successfully!");
+    } catch (error) {
+      console.error("Error saving workout plan: ", error);
+      toast.error('Error creating workout plan: ' + error.message);
+    }
   };
 
-  const handleLogProgress = (progress) => {
-    setWorkoutHistory([...workoutHistory, progress]);
-    // this is empty for now (will add functionality later)
+  const handleAdjustWorkout = async (feedback) => {
+    try {
+      if (!user) {
+        throw new Error("User is not authenticated! Please sign in to adjust your workout.");
+      }
+      const docRef = await addDoc(collection(database, `users/${user.uid}/workoutAdjustments`), feedback);
+      console.log("Workout adjustment saved with ID: ", docRef.id);
+      toast.success('Workout adjusted successfully!');
+    } catch (error) {
+      console.error("Error saving workout adjustment: ", error);
+      toast.error('Error adjusting workout: ' + error.message);
+    }
   };
 
-  const handleAdjustWorkout = (feedback) => {
-    // this is empty for now (will add functionality later)
+  const handleSetRestDay = async (days) => {
+    try {
+      if (!user) {
+        throw new Error("User is not authenticated! Please sign in to set your rest days.");
+      }
+      const docRef = await addDoc(collection(database, `users/${user.uid}/restDays`), { days });
+      console.log("Rest days saved with ID: ", docRef.id);
+      toast.success('Rest days set successfully!');
+    } catch (error) {
+      console.error("Error saving rest days: ", error);
+      toast.error('Error setting rest days: ' + error.message);
+    }
   };
 
-  const handleSetRestDay = (day) => {
-    // this is empty for now (will add functionality later)
+  const handleExerciseVariation = async (exerciseName, variationName) => {
+    try {
+      if (!user) {
+        throw new Error("User is not authenticated! Please sign in to select exercise variations.");
+      }
+      const data = {
+        exercise: exerciseName,
+        variation: variationName,
+        timestamp: new Date(),
+      };
+      const docRef = await addDoc(
+        collection(database, `users/${user.uid}/exerciseVariations`),
+        data
+      );
+      console.log("Exercise variation saved with ID: ", docRef.id);
+      toast.success(
+        `Selected variation "${variationName}" for "${exerciseName}".`
+      );
+    } catch (error) {
+      console.error("Error saving exercise variation: ", error);
+      toast.error("Error selecting exercise variation: " + error.message);
+    }
   };
 
-  const handleExerciseVariation = (exercise, variation) => {
-    // this is empty for now (will add functionality later)
-  };
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
@@ -59,10 +110,21 @@ const Workout = () => {
 
   return (
     <div className={`min-h-screen ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"}`}>
-        <style>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+      <style>
         {`
           @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-            body {
+          body {
             font-family: 'Poppins', sans-serif;
             min-height: 100vh;
             margin: 0;
@@ -71,10 +133,10 @@ const Workout = () => {
       </style>
       <header className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} sticky top-0 left-0 w-full p-4 shadow-md z-50`}>
         <div className="container mx-auto flex justify-between items-center">
-        <a href="/" className="text-2xl font-bold flex items-center">
-          <img src="/images/dreamslogo.png" alt="Dreams Logo" className="w-8 h-8 mr-2" />
-          DREAMS
-        </a>
+          <a href="/" className="text-2xl font-bold flex items-center">
+            <img src="/images/dreamslogo.png" alt="Dreams Logo" className="w-8 h-8 mr-2" />
+            DREAMS
+          </a>
           <div className="md:hidden">
             <button onClick={toggleMenu} className={`${isDarkMode ? 'text-white' : 'text-gray-900'} focus:outline-none`}>
               <FiMenu size={24} />
@@ -88,7 +150,7 @@ const Workout = () => {
                 </Link>
               </li>
               <li>
-                <a href="#" className={`hover:text-blue-400 flex items-center ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                <a href="/nutrition" className={`hover:text-blue-400 flex items-center ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                   <IoMdNutrition className="mr-1" /> Nutrition
                 </a>
               </li>
@@ -106,16 +168,18 @@ const Workout = () => {
             {user ? (
               <>
                 <span className="mt-4 md:mt-0 ml-4 text-lg font-semibold">
-                {`Hi, ${user.displayName || user.email}`}
+                  {`Hi, ${user.displayName || user.email}`}
                 </span>
                 <button
                   onClick={() => {
                     signOut(auth)
                       .then(() => {
                         console.log("User signed out");
+                        alert("Signed out successfully!");
                       })
                       .catch((error) => {
                         console.error("Error signing out:", error);
+                        alert("Error signing out: " + error.message);
                       });
                   }}
                   className="mt-4 md:mt-0 ml-4 bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition duration-300 flex items-center"
@@ -147,10 +211,10 @@ const Workout = () => {
       </header>
       <h1 className={`text-4xl font-bold text-center mt-8 mb-8 ${isDarkMode ? 'text-white' : 'text-black'}`}>Workout Planner</h1>
       <div className="flex justify-center space-x-4 mb-8">
-        <TabButton icon={<FaDumbbell />} label="Create Plan" active={activeTab === "create"} onClick={() => handleTabChange("create")} />
-        <TabButton icon={<FaRedo />} label="Adjust Workout" active={activeTab === "adjust"} onClick={() => handleTabChange("adjust")} />
-        <TabButton icon={<FaBed />} label="Rest Days" active={activeTab === "rest"} onClick={() => handleTabChange("rest")} />
-        <TabButton icon={<FaRandom />} label="Variations" active={activeTab === "variations"} onClick={() => handleTabChange("variations")} />
+        <TabButton icon={<FaDumbbell />} label="Create Plan" active={activeTab === "create"} onClick={() => handleTabChange("create")} isDarkMode={isDarkMode} />
+        <TabButton icon={<FaRedo />} label="Adjust Workout" active={activeTab === "adjust"} onClick={() => handleTabChange("adjust")} isDarkMode={isDarkMode} />
+        <TabButton icon={<FaBed />} label="Rest Days" active={activeTab === "rest"} onClick={() => handleTabChange("rest")} isDarkMode={isDarkMode} />
+        <TabButton icon={<FaRandom />} label="Variations" active={activeTab === "variations"} onClick={() => handleTabChange("variations")} isDarkMode={isDarkMode} />
       </div>
 
       {activeTab === "create" && <CreateWorkoutPlan onCreateWorkout={handleCreateWorkout} isDarkMode={isDarkMode} />}
@@ -265,7 +329,6 @@ const CreateWorkoutPlan = ({ onCreateWorkout, isDarkMode }) => {
   );
 };
 
-
 const AdjustWorkout = ({ onAdjustWorkout, isDarkMode }) => {
   const [difficulty, setDifficulty] = useState(3);
   const [feedback, setFeedback] = useState("");
@@ -322,6 +385,7 @@ const AdjustWorkout = ({ onAdjustWorkout, isDarkMode }) => {
 
 const RestDays = ({ onSetRestDay, isDarkMode }) => {
   const [selectedDays, setSelectedDays] = useState([]);
+  const [errors, setErrors] = useState({});
 
   const toggleDay = (day) => {
     if (selectedDays.includes(day)) {
@@ -333,11 +397,23 @@ const RestDays = ({ onSetRestDay, isDarkMode }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const newErrors = {};
+    if (selectedDays.length === 0) {
+      newErrors.selectedDays = "Please select at least one rest day.";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
     onSetRestDay(selectedDays);
+    setSelectedDays([]);
+    setErrors({});
   };
 
   return (
-    <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} sticky top-0 left-0 w-full p-4 shadow-md z-50`}>
+    <div className={`shadow-md rounded-lg p-6 ${isDarkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"}`}>
       <h2 className={`text-2xl font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-black'}`}>Set Rest Days</h2>
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-7 gap-2 mb-4">
@@ -352,6 +428,7 @@ const RestDays = ({ onSetRestDay, isDarkMode }) => {
             </button>
           ))}
         </div>
+        {errors.selectedDays && <p className="text-red-500 text-xs italic mb-4">{errors.selectedDays}</p>}
         <button
           type="submit"
           className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-3xl focus:outline-none focus:shadow-outline"
@@ -360,16 +437,16 @@ const RestDays = ({ onSetRestDay, isDarkMode }) => {
         </button>
       </form>
       <div className="mt-4">
-        <h3 className={`text-lg font-semibold mb-2 `}>Why Rest Days Matter</h3>
+        <h3 className={`text-lg font-semibold mb-2 ${isDarkMode ? 'text-white' : 'text-black'}`}>Why Rest Days Matter</h3>
         <p>
-        Rest days are an essential part of any effective fitness routine, not just for muscle recovery, 
-        but also for overall progress and long-term health. When you exercise, your muscles undergo stress and tiny tears, 
-        and it's during rest that they repair and grow stronger. Skipping rest days can lead to burnout, overtraining, 
-        and an increased risk of injury, which could ultimately derail your fitness journey. 
-        By incorporating 1-2 rest days each week, you give your body the chance to rebuild and restore, 
-        allowing you to come back to your workouts feeling refreshed and ready to perform at your best. 
-        It's important to listen to your body—rest days aren’t a sign of weakness but a key component of balanced 
-        training that can elevate your results and prevent setbacks.
+          Rest days are an essential part of any effective fitness routine, not just for muscle recovery,
+          but also for overall progress and long-term health. When you exercise, your muscles undergo stress and tiny tears,
+          and it's during rest that they repair and grow stronger. Skipping rest days can lead to burnout, overtraining,
+          and an increased risk of injury, which could ultimately derail your fitness journey.
+          By incorporating 1-2 rest days each week, you give your body the chance to rebuild and restore,
+          allowing you to come back to your workouts feeling refreshed and ready to perform at your best.
+          It's important to listen to your body—rest days aren’t a sign of weakness but a key component of balanced
+          training that can elevate your results and prevent setbacks.
         </p>
       </div>
     </div>
@@ -383,34 +460,41 @@ const ExerciseVariations = ({ onSelectVariation, isDarkMode }) => {
     {
       name: "Planks",
       variations: [
-        { name: "Forearm plank", image: require("./PlankForearm.jpg"), 
-        description: "One of the most common ways to perform a plank, is slightly easier than holding your body up with just your hands.\n\nPlace forearms on the floor with elbows aligned below shoulders and arms parallel to your body at about shoulder width. If flat palms bother your wrists, clasp your hands together." },
-        { name: "Side plank", image: require("./SidePlank.jpg"), 
+        {
+          name: "Forearm plank", image: require("./PlankForearm.jpg"),
+          description: "One of the most common ways to perform a plank, is slightly easier than holding your body up with just your hands.\n\nPlace forearms on the floor with elbows aligned below shoulders and arms parallel to your body at about shoulder width. If flat palms bother your wrists, clasp your hands together."
+        },
+        {
+          name: "Side plank", image: require("./SidePlank.jpg"),
           description: "This core exercise targets your obliques, shoulders, glutes, and legs. Start by lying on your side with legs stacked and prop yourself up on your elbow or hand. Engage your core, lift your hips, and keep your body in a straight line. To make it harder, raise your top arm or leg, or both. For more support, cross your top leg in front of your body. Hold and maintain alignment for maximum benefit."
         },
-        { name: "Plank shoulder taps", image: require("./PlankShoulderTaps.jpg"),
+        {
+          name: "Plank shoulder taps", image: require("./PlankShoulderTaps.jpg"),
           description: "This plank variation adds a dynamic element to the exercise, challenging your core and shoulder stability. Start in a high plank position with hands directly under shoulders and feet hip-width apart. Keeping your hips square to the floor, lift one hand and tap the opposite shoulder. Return to the starting position and repeat on the other side. Continue alternating sides while maintaining a strong plank position."
-         },
+        },
       ],
     },
     {
       name: "Squats",
       variations: [
-        { name: "Barbell back squat", image: require("./BackSquat.jpg"), 
+        {
+          name: "Barbell back squat", image: require("./BackSquat.jpg"),
           description: "This compound movement strengthens your quads, core, and glutes. Start by positioning the barbell on the front of your shoulders, keeping your elbows up and chest high. Stand with feet shoulder-width apart, then lower your body into a squat by bending at the hips and knees. Keep your back straight and core tight. Push through your heels to return to standing. Ensure the barbell stays stable and your torso upright throughout."
-         },
-        { name: "Dumbbell squat", image: require("./DumbbellSquat.jpg"), 
+        },
+        {
+          name: "Dumbbell squat", image: require("./DumbbellSquat.jpg"),
           description: "This compound movement strengthens your quads, glutes, hamstrings, and core. Start by holding a dumbbell in each hand at your sides or at shoulder level. Stand with feet shoulder-width apart, then lower your body into a squat by bending at the hips and knees. Keep your chest up, back straight, and core tight. Push through your heels to return to standing. Ensure your posture stays upright throughout the movement."
         },
-        { name: "Sumo squat", image: require("./SumoSquat.jpg"),
+        {
+          name: "Sumo squat", image: require("./SumoSquat.jpg"),
           description: "This compound movement targets your inner thighs, glutes, and quads. Begin by standing with feet wider than shoulder-width apart and toes pointing outward. Hold a dumbbell or kettlebell with both hands in front of your hips. Lower your body into a squat by bending at the hips and knees. Keep your chest up, back straight, and core engaged. Press through your heels to return to standing, maintaining stability in your torso throughout."
-         },
+        },
       ],
     },
   ];
 
   return (
-    <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} sticky top-0 left-0 w-full p-4 shadow-md z-50`}>
+    <div className={`shadow-md rounded-lg p-6 ${isDarkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"}`}>
       <h2 className={`text-2xl font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-black'}`}>Exercise Variations</h2>
       <div className="grid grid-cols-2 gap-4">
         {exercises.map((exercise) => (
@@ -418,16 +502,24 @@ const ExerciseVariations = ({ onSelectVariation, isDarkMode }) => {
             <h3 className="text-lg font-semibold mb-2">{exercise.name}</h3>
             <button
               className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-3xl focus:outline-none focus:shadow-outline"
-              onClick={() => setSelectedExercise(exercise)}
+              onClick={() => {
+                if (selectedExercise && selectedExercise.name === exercise.name) {
+                  setSelectedExercise(null);
+                } else {
+                  setSelectedExercise(exercise);
+                }
+              }}
             >
-              View Variations
+              {selectedExercise && selectedExercise.name === exercise.name ? 'Hide Variations' : 'View Variations'}
             </button>
           </div>
         ))}
       </div>
       {selectedExercise && (
         <div className="mt-6">
-          <h3 className="text-xl font-semibold mb-4">{selectedExercise.name} Variations</h3>
+          <h3 className="text-xl font-semibold mb-4">
+            {selectedExercise.name} Variations
+          </h3>
           <div className="grid grid-cols-3 gap-4">
             {selectedExercise.variations.map((variation) => (
               <div key={variation.name} className="border rounded-lg p-4">
