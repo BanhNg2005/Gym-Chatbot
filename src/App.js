@@ -481,7 +481,7 @@ const HomePage = () => {
       {/* Chatbot Modal */}
       {isChatbotOpen && (
         <div
-          className={`fixed bottom-20 right-6 border rounded-lg shadow-lg w-80 max-w-full z-50 ${isDarkMode
+          className={`fixed bottom-20 right-1 border rounded-lg shadow-lg w-96 max-w-full z-50 ${isDarkMode
               ? 'bg-gray-800 text-white border-gray-700'
               : 'bg-white text-gray-900 border-gray-300'
             }`}
