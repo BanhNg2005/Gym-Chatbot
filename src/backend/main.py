@@ -27,7 +27,29 @@ GYM_KEYWORDS = [
     'training', 'muscle', 'strength', 'cardio', 'weights', 'bodybuilding',
     'health', 'wellness', 'supplements', 'protein', 'calories', 'sleep',
     'rest', 'recovery', 'flexibility', 'endurance', 'aerobics', 'yoga',
-    'pilates', 'HIIT', 'crossfit', 'stretching', 'mobility'
+    'pilates', 'HIIT', 'crossfit', 'stretching', 'mobility', 'body composition',
+    'fat loss', 'weight loss', 'bulking', 'cutting', 'macros', 'micros',
+    'vitamins', 'minerals', 'hydration', 'water', 'pre-workout', 'post-workout',
+    'meal', 'snack', 'breakfast', 'lunch', 'dinner', 'macros', 'micros',
+    'calories', 'carbs', 'protein', 'fats', 'fiber', 'sugar', 'sodium',
+    'cholesterol', 'caffeine', 'alcohol', 'fasting', 'intermittent fasting',
+    'keto', 'paleo', 'vegan', 'vegetarian', 'flexitarian', 'carnivore',
+    'omnivore', 'meal prep', 'recipe', 'food', 'grocery', 'shopping',
+    'restaurant', 'eating out', 'cheat meal', 'cheat day', 'binge',
+    'binge eating', 'emotional eating', 'stress eating', 'mindful eating',
+    'portion control', 'food tracking', 'calorie tracking', 'macro tracking',
+    'meal timing', 'meal frequency', 'nutrient timing', 'supplement timing',
+    'pre-workout meal', 'post-workout meal', 'bedtime snack', 'hydration',
+    'water intake', 'sports drink', 'energy drink', 'protein shake',
+    'triceps', 'biceps', 'quads', 'hamstrings', 'glutes', 'calves',
+    'abs', 'core', 'chest', 'back', 'shoulders', 'traps', 'forearms',
+    'wrists', 'neck', 'obliques', 'lats', 'rhomboids', 'traps', 'delts',
+    'meaning', 'definition', 'benefits', 'advantages', 'disadvantages',
+    'risks', 'side effects', 'precautions', 'contraindications',
+    'dosage', 'instructions', 'how to', 'tips', 'tricks', 'hacks',
+    'myths', 'facts', 'research', 'studies', 'science', 'evidence',
+    'expert', 'professional', 'coach', 'trainer', 'doctor', 'physician',
+    'quote', 'motivation', 'inspiration', 'success', 'progress'
 ]
 
 def is_gym_related(message):
