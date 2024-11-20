@@ -2,18 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { IoMdFitness, IoMdNutrition } from "react-icons/io";
-import {
-  FaSignInAlt,
-  FaSignOutAlt,
-  FaBed,
-  FaSun,
-  FaMoon,
-} from "react-icons/fa";
+import { FaSignInAlt, FaSignOutAlt, FaBed } from "react-icons/fa";
 import { GiAchievement, GiWaterBottle } from "react-icons/gi";
-import {
-  FiSend,
-  FiMenu,
-} from "react-icons/fi";
+import { FiSend, FiMenu, FiSun, FiMoon } from "react-icons/fi";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -34,6 +25,9 @@ import {
   query,
   orderBy,
   serverTimestamp,
+  doc,
+  updateDoc,
+  deleteDoc, // Imported for editing and deleting
 } from "firebase/firestore";
 import { database } from "./firebase";
 import { ToastContainer, toast } from "react-toastify";
@@ -58,6 +52,10 @@ const SleepTracker = () => {
   const [weight, setWeight] = useState(70);
   const [user, setUser] = useState(null);
   const [errors, setErrors] = useState({});
+  // Added state variables for editing
+  const [editEntryId, setEditEntryId] = useState(null);
+  const [editSleepDuration, setEditSleepDuration] = useState("");
+  const [editSleepQuality, setEditSleepQuality] = useState("");
   const auth = getAuth();
 
   useEffect(() => {
@@ -71,7 +69,10 @@ const SleepTracker = () => {
   useEffect(() => {
     if (user) {
       const sleepCollection = collection(database, `users/${user.uid}/sleep`);
-      const sleepQueryInstance = query(sleepCollection, orderBy("timestamp", "desc"));
+      const sleepQueryInstance = query(
+        sleepCollection,
+        orderBy("timestamp", "desc")
+      );
 
       const unsubscribe = onSnapshot(
         sleepQueryInstance,
@@ -101,6 +102,17 @@ const SleepTracker = () => {
 
   const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  const handleSignOut = () => {
+    signOut(auth)
+      .then(() => {
+        toast.success("Signed out successfully!");
+      })
+      .catch((error) => {
+        console.error("Error signing out:", error);
+        toast.error("Error signing out: " + error.message);
+      });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -146,8 +158,75 @@ const SleepTracker = () => {
       toast.error(`Error adding sleep data: ${error.message}`);
     }
   };
-  
-  // This is to delete the sleep data
+
+  // Function to delete a sleep entry
+  const handleDelete = async (id) => {
+    if (!user) {
+      toast.error("Please sign in to delete your sleep data.");
+      return;
+    }
+
+    try {
+      const sleepDocRef = doc(database, `users/${user.uid}/sleep`, id);
+      await deleteDoc(sleepDocRef);
+      toast.success("Sleep data deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting sleep data:", error);
+      toast.error(`Error deleting sleep data: ${error.message}`);
+    }
+  };
+
+  // Function to initiate editing a sleep entry
+  const handleEditInitiate = (entry) => {
+    setEditEntryId(entry.id);
+    setEditSleepDuration(entry.duration.toString());
+    setEditSleepQuality(entry.quality);
+  };
+
+  // Function to update a sleep entry
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+
+    if (!user) {
+      toast.error("Please sign in to edit your sleep data.");
+      return;
+    }
+
+    const newErrors = {};
+
+    if (!editSleepDuration) {
+      newErrors.editSleepDuration = "Sleep duration is required";
+    } else if (isNaN(editSleepDuration) || parseFloat(editSleepDuration) <= 0) {
+      newErrors.editSleepDuration = "Duration must be a positive number";
+    }
+
+    if (!editSleepQuality) {
+      newErrors.editSleepQuality = "Sleep quality is required";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    try {
+      const duration = parseFloat(editSleepDuration);
+      const sleepDocRef = doc(database, `users/${user.uid}/sleep`, editEntryId);
+      await updateDoc(sleepDocRef, {
+        duration,
+        quality: editSleepQuality,
+      });
+
+      toast.success("Sleep data updated successfully!");
+      setEditEntryId(null);
+      setEditSleepDuration("");
+      setEditSleepQuality("");
+      setErrors({});
+    } catch (error) {
+      console.error("Error updating sleep data:", error);
+      toast.error(`Error updating sleep data: ${error.message}`);
+    }
+  };
 
   const calculateWaterIntake = () => (weight * 0.033).toFixed(2);
 
@@ -173,8 +252,15 @@ const SleepTracker = () => {
   const chartOptions = {
     responsive: true,
     plugins: {
-      legend: { position: "top", labels: { color: isDarkMode ? "#ffffff" : "#000000" } },
-      title: { display: true, text: "Sleep Duration Over Time", color: isDarkMode ? "#ffffff" : "#000000" },
+      legend: {
+        position: "top",
+        labels: { color: isDarkMode ? "#ffffff" : "#000000" },
+      },
+      title: {
+        display: true,
+        text: "Sleep Duration Over Time",
+        color: isDarkMode ? "#ffffff" : "#000000",
+      },
     },
     scales: {
       x: {
@@ -198,165 +284,184 @@ const SleepTracker = () => {
         position="top-right"
         autoClose={5000}
         hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
       />
-
       <header
-        className={`${isDarkMode ? "bg-gray-800" : "bg-white"} sticky top-0 left-0 w-full p-4 shadow-md z-50`}
+        className={`py-4 ${
+          isDarkMode ? "bg-gray-800" : "bg-white"
+        } shadow-md sticky top-0 left-0 w-full p-4 z-50`}
       >
         <div className="container mx-auto flex justify-between items-center">
-          <Link to="/" className="text-2xl font-bold flex items-center">
-            <img
-              src="/images/dreamslogo.png"
-              alt="Dreams Logo"
-              className="w-8 h-8 mr-2"
-            />
+          <a href="/" className="text-2xl font-bold flex items-center">
+            <img src="/images/dreamslogo.png" alt="Dreams Logo" className="w-8 h-8 mr-2"/>
             DREAMS
-          </Link>
-          <div className="md:hidden">
-            <button
-              onClick={toggleMenu}
-              className={`${isDarkMode ? "text-white" : "text-gray-900"} focus:outline-none`}
-              aria-label="Toggle menu"
-            >
-              <FiMenu size={24} />
-            </button>
-          </div>
-          <nav
-            className={`${
-              isMenuOpen ? "block" : "hidden"
-            } md:flex md:items-center absolute md:relative top-16 left-0 right-0 ${
-              isDarkMode ? "bg-gray-800" : "bg-white"
-            } md:bg-transparent z-20 md:top-0`}
-          >
-            <ul className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 p-4 md:p-0">
+          </a>
+          <nav className="hidden md:block">
+            <ul className="flex space-x-6">
               <li>
                 <Link
                   to="/workout"
-                  className={`hover:text-blue-400 flex items-center ${
+                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${
                     isDarkMode ? "text-white" : "text-gray-900"
                   }`}
                 >
-                  <IoMdFitness className="mr-1" /> Workout
+                  <IoMdFitness className="mr-2"/> Workout
                 </Link>
               </li>
               <li>
                 <Link
                   to="/nutrition"
-                  className={`hover:text-blue-400 flex items-center ${
+                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${
                     isDarkMode ? "text-white" : "text-gray-900"
                   }`}
                 >
-                  <IoMdNutrition className="mr-1" /> Nutrition
+                  <IoMdNutrition className="mr-2"/> Nutrition
                 </Link>
               </li>
               <li>
                 <Link
                   to="/sleep"
-                  className={`hover:text-blue-400 flex items-center ${
+                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${
                     isDarkMode ? "text-white" : "text-gray-900"
                   }`}
                 >
-                  <FaBed className="mr-1" /> Sleep
+                  <FaBed className="mr-2"/> Sleep
                 </Link>
               </li>
               <li>
                 <Link
                   to="/achievement"
-                  className={`hover:text-blue-400 flex items-center ${
+                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${
                     isDarkMode ? "text-white" : "text-gray-900"
                   }`}
                 >
-                  <GiAchievement className="mr-1" /> Achievement
+                  <GiAchievement className="mr-2"/> Achievement
                 </Link>
               </li>
             </ul>
+          </nav>
+          <div className="flex items-center space-x-4">
+
             {user ? (
               <>
-                <span className="mt-4 md:mt-0 ml-4 text-lg font-semibold">{`Hi, ${
+                <span className="text-lg font-semibold hidden md:block">{`Hi, ${
                   user.displayName || user.email
                 }`}</span>
                 <button
-                  onClick={() => {
-                    signOut(auth)
-                      .then(() => {
-                        toast.success("Signed out successfully!");
-                      })
-                      .catch((error) => {
-                        console.error("Error signing out:", error);
-                        toast.error("Error signing out: " + error.message);
-                      });
-                  }}
-                  className="mt-4 md:mt-0 ml-4 bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition duration-300 flex items-center"
+                  onClick={handleSignOut}
+                  className="hidden md:flex items-center space-x-2 bg-red-700 text-white px-4 py-2 rounded-full hover:bg-red-500 transition-colors duration-300"
+                  aria-label="Sign out"
                 >
-                  <FaSignOutAlt className="mr-2" />
-                  Sign Out
+                  <FaSignOutAlt/>
+                  <span>Sign Out</span>
                 </button>
               </>
             ) : (
               <Link to="/login">
-                <button className="mt-4 md:mt-0 ml-4 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition duration-300 flex items-center">
-                  <FaSignInAlt className="mr-2" />
-                  Sign In
+                <button
+                  className="hidden md:flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition-colors duration-300"
+                  aria-label="Sign in"
+                >
+                  <FaSignInAlt/>
+                  <span>Sign In</span>
                 </button>
               </Link>
             )}
             <button
               onClick={toggleDarkMode}
-              className="ml-4 p-2 rounded-full focus:outline-none transition-colors duration-200 ease-in-out"
+              className={`p-2 rounded-full ${
+                isDarkMode ? "bg-yellow-400" : "bg-gray-200"
+              }`}
               aria-label="Toggle dark mode"
             >
-              {isDarkMode ? (
-                <FaSun className="text-yellow-400" size={24} />
-              ) : (
-                <FaMoon className="text-gray-700" size={24} />
-              )}
+              {isDarkMode ? <FiSun className="text-gray-900"/> : <FiMoon/>}
             </button>
-          </nav>
-          {isMenuOpen && (
-            <div className="md:hidden mt-4 px-4">
-              <nav>
-                <ul className="space-y-2">
-                  <li>
-                    <Link
-                      to="/workout"
-                      className="py-2 hover:text-blue-500 transition-colors duration-300 flex items-center"
-                    >
-                      <IoMdFitness className="mr-2" /> Workout
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/nutrition"
-                      className="py-2 hover:text-blue-500 transition-colors duration-300 flex items-center"
-                    >
-                      <IoMdNutrition className="mr-2" /> Nutrition
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/sleep"
-                      className="py-2 hover:text-blue-500 transition-colors duration-300 flex items-center"
-                    >
-                      <FaBed className="mr-2" /> Sleep
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      to="/achievement"
-                      className="py-2 hover:text-blue-500 transition-colors duration-300 flex items-center"
-                    >
-                      <GiAchievement className="mr-2" /> Achievement
-                    </Link>
-                  </li>
-                </ul>
-              </nav>
-            </div>
-          )}
+            <button
+              onClick={toggleMenu}
+              className="md:hidden p-2 rounded-full bg-gray-200"
+              aria-label="Toggle menu"
+            >
+              <FiMenu/>
+            </button>
+          </div>
         </div>
+        {isMenuOpen && (
+          <div className="md:hidden mt-4 px-4">
+            <nav>
+              <ul className="space-y-2">
+                <li>
+                  <Link
+                    to="/workout"
+                    className="py-2 hover:text-blue-500 transition-colors duration-300 flex items-center"
+                  >
+                    <IoMdFitness className="mr-2"/> Workout
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/nutrition"
+                    className="py-2 hover:text-blue-500 transition-colors duration-300 flex items-center"
+                  >
+                    <IoMdNutrition className="mr-2"/> Nutrition
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/sleep"
+                    className="py-2 hover:text-blue-500 transition-colors duration-300 flex items-center"
+                  >
+                    <FaBed className="mr-2"/> Sleep
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/achievement"
+                    className="py-2 hover:text-blue-500 transition-colors duration-300 flex items-center"
+                  >
+                    <GiAchievement className="mr-2"/> Achievement
+                  </Link>
+                </li>
+              </ul>
+            </nav>
+            {user ? (
+              <>
+                <span className="mt-4 block text-lg font-semibold">{`Hi, ${
+                  user.displayName || user.email
+                }`}</span>
+                <button
+                  onClick={() => {
+                    handleSignOut();
+                    setIsMenuOpen(false);
+                  }}
+                  className="mt-4 flex items-center space-x-2 bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition-colors duration-300 w-full"
+                  aria-label="Sign out"
+                >
+                  <FaSignOutAlt/>
+                  <span>Sign Out</span>
+                </button>
+              </>
+            ) : (
+              <Link to="/login">
+                <button
+                  className="mt-4 flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition-colors duration-300 w-full"
+                  aria-label="Sign in"
+                >
+                  <FaSignInAlt/>
+                  <span>Sign In</span>
+                </button>
+              </Link>
+            )}
+          </div>
+        )}
       </header>
 
       <main className="container mx-auto px-4 py-8 flex-grow">
-        {/* this is sleep tracking section*/}
+        {/* Sleep Tracking Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-6xl mx-auto">
           <section
             className={`p-6 rounded-lg shadow-lg ${
@@ -422,7 +527,7 @@ const SleepTracker = () => {
               </div>
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-300 flex items-center justify-center " 
+                className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-300 flex items-center justify-center"
               >
                 <span>Log Sleep</span>
                 <FiSend className="ml-2" />
@@ -445,7 +550,7 @@ const SleepTracker = () => {
           </section>
         </div>
 
-        {/* This is the sleep insight section */}
+        {/* Sleep Insights Section */}
         <section
           className={`mt-8 p-6 rounded-lg shadow-lg ${
             isDarkMode ? "bg-gray-800" : "bg-white"
@@ -466,7 +571,7 @@ const SleepTracker = () => {
           </ul>
         </section>
 
-        {/* the hydration section section */}
+        {/* Hydration Tip Section */}
         <section
           className={`mt-8 p-6 rounded-lg shadow-lg ${
             isDarkMode ? "bg-gray-800" : "bg-white"
@@ -510,7 +615,7 @@ const SleepTracker = () => {
           </div>
         </section>
 
-        {/* this is where the sleep history is shown */}
+        {/* Sleep History Section */}
         <section
           className={`mt-8 p-6 rounded-lg shadow-lg ${
             isDarkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"
@@ -522,10 +627,115 @@ const SleepTracker = () => {
           ) : (
             <ul className="space-y-2">
               {sleepHistory.map((entry) => (
-                <li key={entry.id} className={`p-2 rounded ${isDarkMode ? "bg-gray-700" : "bg-gray-100"}`}>
-                  <p>Date: {entry.timestamp.toLocaleDateString()}</p>
-                  <p>Duration: {entry.duration} hours</p>
-                  <p>Quality: {entry.quality}</p>
+                <li
+                  key={entry.id}
+                  className={`p-4 rounded ${
+                    isDarkMode ? "bg-gray-700" : "bg-gray-100"
+                  }`}
+                >
+                  {editEntryId === entry.id ? (
+                    // Edit form
+                    <form onSubmit={handleUpdate} className="space-y-2">
+                      <div>
+                        <label
+                          htmlFor="editSleepDuration"
+                          className="block mb-1"
+                        >
+                          Sleep Duration (hours)
+                        </label>
+                        <input
+                          type="number"
+                          id="editSleepDuration"
+                          value={editSleepDuration}
+                          onChange={(e) =>
+                            setEditSleepDuration(e.target.value)
+                          }
+                          className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                            isDarkMode
+                              ? "bg-gray-600 text-white border-gray-500"
+                              : "bg-white text-gray-900 border-gray-300"
+                          }`}
+                          min="0"
+                          step="0.1"
+                          required
+                        />
+                        {errors.editSleepDuration && (
+                          <p className="text-red-500 text-sm mt-1">
+                            {errors.editSleepDuration}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="editSleepQuality"
+                          className="block mb-1"
+                        >
+                          Sleep Quality
+                        </label>
+                        <select
+                          id="editSleepQuality"
+                          value={editSleepQuality}
+                          onChange={(e) =>
+                            setEditSleepQuality(e.target.value)
+                          }
+                          className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                            isDarkMode
+                              ? "bg-gray-600 text-white border-gray-500"
+                              : "bg-white text-gray-900 border-gray-300"
+                          }`}
+                          required
+                        >
+                          <option value="">Select quality</option>
+                          <option value="Poor">Poor</option>
+                          <option value="Fair">Fair</option>
+                          <option value="Good">Good</option>
+                          <option value="Very Good">Very Good</option>
+                          <option value="Excellent">Excellent</option>
+                        </select>
+                        {errors.editSleepQuality && (
+                          <p className="text-red-500 text-sm mt-1">
+                            {errors.editSleepQuality}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex space-x-2">
+                        <button
+                          type="submit"
+                          className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors duration-300"
+                        >
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditEntryId(null)}
+                          className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors duration-300"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    // Display entry
+                    <div>
+                      <p>Date: {entry.timestamp.toLocaleDateString()}</p>
+                      <p>Duration: {entry.duration} hours</p>
+                      <p>Quality: {entry.quality}</p>
+                      <div className="mt-2 flex space-x-2">
+                        <button
+                          onClick={() => handleEditInitiate(entry)}
+                          className="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 transition-colors duration-300"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(entry.id)}
+                          className="bg-red-600 text-white px-3 py-1 rounded-md hover:bg-red-700 transition-colors duration-300"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>
