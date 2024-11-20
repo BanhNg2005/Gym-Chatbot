@@ -1,23 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import {
-  FaInstagram,
-  FaFacebook,
-  FaGithub,
-  FaSignInAlt,
-  FaSignOutAlt,
-  FaMoon,
-  FaSun,
-  FaCommentDots,
-} from "react-icons/fa";
+import { FaInstagram, FaFacebook, FaGithub, FaSignInAlt, FaSignOutAlt, FaCommentDots } from "react-icons/fa";
 import { IoMdFitness, IoMdNutrition } from "react-icons/io";
 import { FaBed } from "react-icons/fa";
 import { GiAchievement } from "react-icons/gi";
-import { FiSend, FiMenu } from "react-icons/fi";
+import { FiSend, FiMenu, FiSun, FiMoon } from "react-icons/fi";
 import SignUpForm from "./components/signup";
 import SignInPage from "./components/login";
 import Workout from "./components/workout";
 import NutritionDashboard from "./components/nutrition";
+import SleepTracker from "./components/sleep";
 import videoBg from "./homeBg.mp4";
 import "./index.css";
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
@@ -46,6 +38,17 @@ const HomePage = () => {
 
     return () => unsubscribe();
   }, [auth]);
+
+  const handleSignOut = () => {
+    signOut(auth)
+      .then(() => {
+        toast.success("Signed out successfully!");
+      })
+      .catch((error) => {
+        console.error("Error signing out:", error);
+        toast.error("Error signing out: " + error.message);
+      });
+  };
 
   const handleChatSubmit = async (e) => {
     e.preventDefault();
@@ -132,120 +135,173 @@ const HomePage = () => {
         draggable
         pauseOnHover
       />
-      <style>
-        {`
-          @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-          body {
-            font-family: 'Poppins', sans-serif;
-          }
-        `}
-      </style>
       <header
-        className={`${isDarkMode ? "bg-gray-800" : "bg-white"
-          } sticky top-0 left-0 w-full p-4 shadow-md z-50`}
+        className={`py-4 ${
+          isDarkMode ? "bg-gray-800" : "bg-white"
+        } shadow-md sticky top-0 left-0 w-full p-4 z-50`}
       >
         <div className="container mx-auto flex justify-between items-center">
           <a href="/" className="text-2xl font-bold flex items-center">
-            <img
-              src="/images/dreamslogo.png"
-              alt="Dreams Logo"
-              className="w-8 h-8 mr-2"
-            />
+            <img src="/images/dreamslogo.png" alt="Dreams Logo" className="w-8 h-8 mr-2"/>
             DREAMS
           </a>
-          <div className="md:hidden">
-            <button
-              onClick={toggleMenu}
-              className={`${isDarkMode ? "text-white" : "text-gray-900"
-                } focus:outline-none`}
-            >
-              <FiMenu size={24} />
-            </button>
-          </div>
-          <nav
-            className={`${isMenuOpen ? "block" : "hidden"
-              } md:flex md:items-center absolute md:relative top-16 left-0 right-0 ${isDarkMode ? "bg-gray-800" : "bg-white"
-              } md:bg-transparent z-20 md:top-0`}
-          >
-            <ul className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 p-4 md:p-0">
+          <nav className="hidden md:block">
+            <ul className="flex space-x-6">
               <li>
                 <Link
                   to="/workout"
-                  className={`hover:text-blue-400 flex items-center ${isDarkMode ? "text-white" : "text-gray-900"
-                    }`}
+                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${
+                    isDarkMode ? "text-white" : "text-gray-900"
+                  }`}
                 >
-                  <IoMdFitness className="mr-1" /> Workout
+                  <IoMdFitness className="mr-2"/> Workout
                 </Link>
               </li>
               <li>
-                <a
-                  href="/nutrition"
-                  className={`hover:text-blue-400 flex items-center ${isDarkMode ? "text-white" : "text-gray-900"
-                    }`}
+                <Link
+                  to="/nutrition"
+                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${
+                    isDarkMode ? "text-white" : "text-gray-900"
+                  }`}
                 >
-                  <IoMdNutrition className="mr-1" /> Nutrition
-                </a>
+                  <IoMdNutrition className="mr-2"/> Nutrition
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
-                  className={`hover:text-blue-400 flex items-center ${isDarkMode ? "text-white" : "text-gray-900"
-                    }`}
+                <Link
+                  to="/sleep"
+                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${
+                    isDarkMode ? "text-white" : "text-gray-900"
+                  }`}
                 >
-                  <FaBed className="mr-1" /> Sleep
-                </a>
+                  <FaBed className="mr-2"/> Sleep
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
-                  className={`hover:text-blue-400 flex items-center ${isDarkMode ? "text-white" : "text-gray-900"
-                    }`}
+                <Link
+                  to="/achievement"
+                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${
+                    isDarkMode ? "text-white" : "text-gray-900"
+                  }`}
                 >
-                  <GiAchievement className="mr-1" /> Achievement
-                </a>
+                  <GiAchievement className="mr-2"/> Achievement
+                </Link>
               </li>
             </ul>
+          </nav>
+          <div className="flex items-center space-x-4">
+
             {user ? (
               <>
-                <span className="mt-4 md:mt-0 ml-4 text-lg font-semibold">
-                  {`Hi, ${user.displayName || user.email}`}
-                </span>
+                <span className="text-lg font-semibold hidden md:block">{`Hi, ${
+                  user.displayName || user.email
+                }`}</span>
                 <button
-                  onClick={() => {
-                    signOut(auth)
-                      .then(() => {
-                        console.log("User signed out");
-                      })
-                      .catch((error) => {
-                        console.error("Error signing out:", error);
-                      });
-                  }}
-                  className="mt-4 md:mt-0 ml-4 bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition duration-300 flex items-center"
+                  onClick={handleSignOut}
+                  className="hidden md:flex items-center space-x-2 bg-red-700 text-white px-4 py-2 rounded-full hover:bg-red-500 transition-colors duration-300"
+                  aria-label="Sign out"
                 >
-                  <FaSignOutAlt className="mr-2" />
-                  Sign Out
+                  <FaSignOutAlt/>
+                  <span>Sign Out</span>
                 </button>
               </>
             ) : (
               <Link to="/login">
-                <button className="mt-4 md:mt-0 ml-4 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition duration-300 flex items-center">
-                  <FaSignInAlt className="mr-2" />
-                  Sign In
+                <button
+                  className="hidden md:flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition-colors duration-300"
+                  aria-label="Sign in"
+                >
+                  <FaSignInAlt/>
+                  <span>Sign In</span>
                 </button>
               </Link>
             )}
             <button
               onClick={toggleDarkMode}
-              className="ml-4 p-2 rounded-full focus:outline-none transition-colors duration-200 ease-in-out"
+              className={`p-2 rounded-full ${
+                isDarkMode ? "bg-yellow-400" : "bg-gray-200"
+              }`}
+              aria-label="Toggle dark mode"
             >
-              {isDarkMode ? (
-                <FaSun className="text-yellow-400" size={24} />
-              ) : (
-                <FaMoon className="text-gray-700" size={24} />
-              )}
+              {isDarkMode ? <FiSun className="text-gray-900"/> : <FiMoon/>}
             </button>
-          </nav>
+            <button
+              onClick={toggleMenu}
+              className="md:hidden p-2 rounded-full bg-gray-200"
+              aria-label="Toggle menu"
+            >
+              <FiMenu/>
+            </button>
+          </div>
         </div>
+        {isMenuOpen && (
+          <div className="md:hidden mt-4 px-4">
+            <nav>
+              <ul className="space-y-2">
+                <li>
+                  <Link
+                    to="/workout"
+                    className="py-2 hover:text-blue-500 transition-colors duration-300 flex items-center"
+                  >
+                    <IoMdFitness className="mr-2"/> Workout
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/nutrition"
+                    className="py-2 hover:text-blue-500 transition-colors duration-300 flex items-center"
+                  >
+                    <IoMdNutrition className="mr-2"/> Nutrition
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/sleep"
+                    className="py-2 hover:text-blue-500 transition-colors duration-300 flex items-center"
+                  >
+                    <FaBed className="mr-2"/> Sleep
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/achievement"
+                    className="py-2 hover:text-blue-500 transition-colors duration-300 flex items-center"
+                  >
+                    <GiAchievement className="mr-2"/> Achievement
+                  </Link>
+                </li>
+              </ul>
+            </nav>
+            {user ? (
+              <>
+                <span className="mt-4 block text-lg font-semibold">{`Hi, ${
+                  user.displayName || user.email
+                }`}</span>
+                <button
+                  onClick={() => {
+                    handleSignOut();
+                    setIsMenuOpen(false);
+                  }}
+                  className="mt-4 flex items-center space-x-2 bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition-colors duration-300 w-full"
+                  aria-label="Sign out"
+                >
+                  <FaSignOutAlt/>
+                  <span>Sign Out</span>
+                </button>
+              </>
+            ) : (
+              <Link to="/login">
+                <button
+                  className="mt-4 flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition-colors duration-300 w-full"
+                  aria-label="Sign in"
+                >
+                  <FaSignInAlt/>
+                  <span>Sign In</span>
+                </button>
+              </Link>
+            )}
+          </div>
+        )}
       </header>
       <main className="container mx-auto mt-8 px-4">
         <section className="mb-12 relative overflow-hidden rounded-lg bg-gray-800 text-white py-20">
@@ -447,7 +503,7 @@ const HomePage = () => {
                 <FaInstagram size={28} />
               </a>
               <a
-                href="https://www.facebook.com/nguyen.banh.9"
+                href="https://www.facebook.com/bu.bu.944023/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-400 hover:text-blue-300 transition duration-300"
@@ -561,7 +617,7 @@ const App = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/signup" element={<SignUpForm />} />
         <Route path="/login" element={<SignInPage />} />
-        <Route path="/sleep" element={<h1>Sleep</h1>} />
+        <Route path="/sleep" element={<SleepTracker />} />
         <Route path="/nutrition" element={<NutritionDashboard />} />
         <Route path="/workout" element={<Workout />} />
         <Route path="/achievement" element={<h1>Achievement</h1>} />
