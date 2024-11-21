@@ -553,15 +553,15 @@ const ExerciseVariations = ({ onSelectVariation, isDarkMode }) => {
       name: "Planks",
       variations: [
         {
-          name: "Forearm plank", image: require("./PlankForearm.jpg"),
+          name: "Forearm plank", image: require("./templates/PlankForearm.jpg"),
           description: "One of the most common ways to perform a plank, is slightly easier than holding your body up with just your hands.\n\nPlace forearms on the floor with elbows aligned below shoulders and arms parallel to your body at about shoulder width. If flat palms bother your wrists, clasp your hands together."
         },
         {
-          name: "Side plank", image: require("./SidePlank.jpg"),
+          name: "Side plank", image: require("./templates/SidePlank.jpg"),
           description: "This core exercise targets your obliques, shoulders, glutes, and legs. Start by lying on your side with legs stacked and prop yourself up on your elbow or hand. Engage your core, lift your hips, and keep your body in a straight line. To make it harder, raise your top arm or leg, or both. For more support, cross your top leg in front of your body. Hold and maintain alignment for maximum benefit."
         },
         {
-          name: "Plank shoulder taps", image: require("./PlankShoulderTaps.jpg"),
+          name: "Plank shoulder taps", image: require("./templates/PlankShoulderTaps.jpg"),
           description: "This plank variation adds a dynamic element to the exercise, challenging your core and shoulder stability. Start in a high plank position with hands directly under shoulders and feet hip-width apart. Keeping your hips square to the floor, lift one hand and tap the opposite shoulder. Return to the starting position and repeat on the other side. Continue alternating sides while maintaining a strong plank position."
         },
       ],
@@ -570,15 +570,15 @@ const ExerciseVariations = ({ onSelectVariation, isDarkMode }) => {
       name: "Squats",
       variations: [
         {
-          name: "Barbell back squat", image: require("./BackSquat.jpg"),
+          name: "Barbell back squat", image: require("./templates/BackSquat.jpg"),
           description: "This compound movement strengthens your quads, core, and glutes. Start by positioning the barbell on the front of your shoulders, keeping your elbows up and chest high. Stand with feet shoulder-width apart, then lower your body into a squat by bending at the hips and knees. Keep your back straight and core tight. Push through your heels to return to standing. Ensure the barbell stays stable and your torso upright throughout."
         },
         {
-          name: "Dumbbell squat", image: require("./DumbbellSquat.jpg"),
+          name: "Dumbbell squat", image: require("./templates/DumbbellSquat.jpg"),
           description: "This compound movement strengthens your quads, glutes, hamstrings, and core. Start by holding a dumbbell in each hand at your sides or at shoulder level. Stand with feet shoulder-width apart, then lower your body into a squat by bending at the hips and knees. Keep your chest up, back straight, and core tight. Push through your heels to return to standing. Ensure your posture stays upright throughout the movement."
         },
         {
-          name: "Sumo squat", image: require("./SumoSquat.jpg"),
+          name: "Sumo squat", image: require("./templates/SumoSquat.jpg"),
           description: "This compound movement targets your inner thighs, glutes, and quads. Begin by standing with feet wider than shoulder-width apart and toes pointing outward. Hold a dumbbell or kettlebell with both hands in front of your hips. Lower your body into a squat by bending at the hips and knees. Keep your chest up, back straight, and core engaged. Press through your heels to return to standing, maintaining stability in your torso throughout."
         },
       ],

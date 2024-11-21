@@ -179,21 +179,21 @@ const Nutrition = () => {
     {
       title: "High Protein Plan",
       description: "Perfect for muscle building and recovery",
-      image: require("./highprotein.jpg"),
+      image: require("./templates/highprotein.jpg"),
       detailedDescription:
         "This high protein meal plan is designed to support muscle growth and recovery. It includes a variety of lean proteins, complex carbohydrates, and healthy fats to fuel your body and promote muscle synthesis. Ideal for athletes and those engaged in strength training.",
     },
     {
       title: "Low Carb Plan",
       description: "Ideal for weight loss and blood sugar control",
-      image: require("./lowcarb.jpg"),
+      image: require("./templates/lowcarb.jpg"),
       detailedDescription:
         "Our low carb meal plan is perfect for those looking to lose weight or manage their blood sugar levels. It focuses on high-quality proteins, healthy fats, and low-glycemic vegetables. This plan helps reduce insulin spikes and promotes fat burning.",
     },
     {
       title: "Balanced Nutrition Plan",
       description: "For overall health and well-being",
-      image: require("./balanced.jpg"),
+      image: require("./templates/balanced.jpg"),
       detailedDescription:
         "The balanced nutrition plan is designed to provide a well-rounded diet that supports overall health and well-being. It includes a mix of lean proteins, whole grains, fruits, vegetables, and healthy fats. This plan is suitable for most people looking to maintain a healthy lifestyle.",
     },
