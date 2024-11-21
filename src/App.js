@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import { FaInstagram, FaFacebook, FaGithub, FaSignInAlt, FaSignOutAlt, FaCommentDots } from "react-icons/fa";
+import {
+  FaInstagram,
+  FaFacebook,
+  FaGithub,
+  FaSignInAlt,
+  FaSignOutAlt,
+  FaCommentDots,
+} from "react-icons/fa";
 import { IoMdFitness, IoMdNutrition } from "react-icons/io";
 import { FaBed } from "react-icons/fa";
 import { GiAchievement } from "react-icons/gi";
@@ -14,7 +21,14 @@ import videoBg from "./homeBg.mp4";
 import "./index.css";
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
 import { database } from "./components/firebase";
-import { collection, addDoc } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+  onSnapshot,
+  query,
+  orderBy,
+} from "firebase/firestore";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ReactMarkdown from "react-markdown";
@@ -29,14 +43,38 @@ const HomePage = () => {
   const auth = getAuth();
   const [user, setUser] = useState(null);
 
-  const collectionRef = collection(database, "chat");
-
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+
+      if (currentUser) {
+        // Set up Firestore listener for chat messages
+        const chatRef = collection(database, `users/${currentUser.uid}/chats`);
+        const q = query(chatRef, orderBy("timestamp", "asc"));
+
+        const unsubscribeChats = onSnapshot(q, (snapshot) => {
+          const chats = snapshot.docs.map((doc) => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              type: data.type,
+              message: data.message,
+              timestamp: data.timestamp?.toDate() || new Date(),
+            };
+          });
+          setChatHistory(chats);
+        });
+
+        return () => {
+          unsubscribeChats();
+        };
+      } else {
+        // Clear chat history when user signs out
+        setChatHistory([]);
+      }
     });
 
-    return () => unsubscribe();
+    return () => unsubscribeAuth();
   }, [auth]);
 
   const handleSignOut = () => {
@@ -59,34 +97,30 @@ const HomePage = () => {
     }
 
     if (!user) {
-      toast.error("You need to login first to send message.");
+      toast.error("You need to login first to send a message.");
       return;
     }
 
-    const messageData = {
-      message: chatMessage,
-      userId: user.uid,
-      timestamp: new Date(),
-    };
-
     try {
-      const docRef = await addDoc(
+      const userMessageData = {
+        message: chatMessage,
+        type: "user",
+        timestamp: serverTimestamp(),
+      };
+
+      // this is the code that sends the user's message to Firestore
+      await addDoc(
         collection(database, `users/${user.uid}/chats`),
-        messageData
+        userMessageData
       );
-      console.log("Chat message saved with ID:", docRef.id);
 
-      setChatHistory((prevHistory) => [
-        ...prevHistory,
-        { type: "user", message: chatMessage },
-      ]);
-
+      // send user's message to the chatbot server
       const response = await fetch("http://localhost:5000/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message: chatMessage, userId: user.uid }),
+        body: JSON.stringify({ message: chatMessage }),
       });
 
       if (!response.ok) {
@@ -95,16 +129,23 @@ const HomePage = () => {
 
       const data = await response.json();
 
-      setChatHistory((prevHistory) => [
-        ...prevHistory,
-        { type: "bot", message: data.response },
-      ]);
+      const botMessageData = {
+        message: data.response,
+        type: "bot",
+        timestamp: serverTimestamp(),
+      };
+
+      // this is the code that sends the chatbot's response to Firestore
+      await addDoc(
+        collection(database, `users/${user.uid}/chats`),
+        botMessageData
+      );
+
+      setChatMessage("");
     } catch (error) {
       console.error("Error submitting chat:", error);
       toast.error("Error submitting chat: " + error.message);
     }
-
-    setChatMessage("");
   };
 
   const toggleMenu = () => {
@@ -136,13 +177,12 @@ const HomePage = () => {
         pauseOnHover
       />
       <header
-        className={`py-4 ${
-          isDarkMode ? "bg-gray-800" : "bg-white"
-        } shadow-md sticky top-0 left-0 w-full p-4 z-50`}
+        className={`py-4 ${isDarkMode ? "bg-gray-800" : "bg-white"
+          } shadow-md sticky top-0 left-0 w-full p-4 z-50`}
       >
         <div className="container mx-auto flex justify-between items-center">
           <a href="/" className="text-2xl font-bold flex items-center">
-            <img src="/images/dreamslogo.png" alt="Dreams Logo" className="w-8 h-8 mr-2"/>
+            <img src="/images/dreamslogo.png" alt="Dreams Logo" className="w-8 h-8 mr-2" />
             DREAMS
           </a>
           <nav className="hidden md:block">
@@ -150,41 +190,37 @@ const HomePage = () => {
               <li>
                 <Link
                   to="/workout"
-                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
+                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
                 >
-                  <IoMdFitness className="mr-2"/> Workout
+                  <IoMdFitness className="mr-2" /> Workout
                 </Link>
               </li>
               <li>
                 <Link
                   to="/nutrition"
-                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
+                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
                 >
-                  <IoMdNutrition className="mr-2"/> Nutrition
+                  <IoMdNutrition className="mr-2" /> Nutrition
                 </Link>
               </li>
               <li>
                 <Link
                   to="/sleep"
-                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
+                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
                 >
-                  <FaBed className="mr-2"/> Sleep
+                  <FaBed className="mr-2" /> Sleep
                 </Link>
               </li>
               <li>
                 <Link
                   to="/achievement"
-                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
+                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
                 >
-                  <GiAchievement className="mr-2"/> Achievement
+                  <GiAchievement className="mr-2" /> Achievement
                 </Link>
               </li>
             </ul>
@@ -193,15 +229,14 @@ const HomePage = () => {
 
             {user ? (
               <>
-                <span className="text-lg font-semibold hidden md:block">{`Hi, ${
-                  user.displayName || user.email
-                }`}</span>
+                <span className="text-lg font-semibold hidden md:block">{`Hi, ${user.displayName || user.email
+                  }`}</span>
                 <button
                   onClick={handleSignOut}
                   className="hidden md:flex items-center space-x-2 bg-red-700 text-white px-4 py-2 rounded-full hover:bg-red-500 transition-colors duration-300"
                   aria-label="Sign out"
                 >
-                  <FaSignOutAlt/>
+                  <FaSignOutAlt />
                   <span>Sign Out</span>
                 </button>
               </>
@@ -211,26 +246,25 @@ const HomePage = () => {
                   className="hidden md:flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition-colors duration-300"
                   aria-label="Sign in"
                 >
-                  <FaSignInAlt/>
+                  <FaSignInAlt />
                   <span>Sign In</span>
                 </button>
               </Link>
             )}
             <button
               onClick={toggleDarkMode}
-              className={`p-2 rounded-full ${
-                isDarkMode ? "bg-yellow-400" : "bg-gray-200"
-              }`}
+              className={`p-2 rounded-full ${isDarkMode ? "bg-yellow-400" : "bg-gray-200"
+                }`}
               aria-label="Toggle dark mode"
             >
-              {isDarkMode ? <FiSun className="text-gray-900"/> : <FiMoon/>}
+              {isDarkMode ? <FiSun className="text-gray-900" /> : <FiMoon />}
             </button>
             <button
               onClick={toggleMenu}
               className="md:hidden p-2 rounded-full bg-gray-200"
               aria-label="Toggle menu"
             >
-              <FiMenu/>
+              <FiMenu />
             </button>
           </div>
         </div>
@@ -243,7 +277,7 @@ const HomePage = () => {
                     to="/workout"
                     className="py-2 hover:text-blue-500 transition-colors duration-300 flex items-center"
                   >
-                    <IoMdFitness className="mr-2"/> Workout
+                    <IoMdFitness className="mr-2" /> Workout
                   </Link>
                 </li>
                 <li>
@@ -251,7 +285,7 @@ const HomePage = () => {
                     to="/nutrition"
                     className="py-2 hover:text-blue-500 transition-colors duration-300 flex items-center"
                   >
-                    <IoMdNutrition className="mr-2"/> Nutrition
+                    <IoMdNutrition className="mr-2" /> Nutrition
                   </Link>
                 </li>
                 <li>
@@ -259,7 +293,7 @@ const HomePage = () => {
                     to="/sleep"
                     className="py-2 hover:text-blue-500 transition-colors duration-300 flex items-center"
                   >
-                    <FaBed className="mr-2"/> Sleep
+                    <FaBed className="mr-2" /> Sleep
                   </Link>
                 </li>
                 <li>
@@ -267,35 +301,34 @@ const HomePage = () => {
                     to="/achievement"
                     className="py-2 hover:text-blue-500 transition-colors duration-300 flex items-center"
                   >
-                    <GiAchievement className="mr-2"/> Achievement
+                    <GiAchievement className="mr-2" /> Achievement
                   </Link>
                 </li>
               </ul>
             </nav>
             {user ? (
               <>
-                <span className="mt-4 block text-lg font-semibold">{`Hi, ${
-                  user.displayName || user.email
-                }`}</span>
+                <span className="mt-4 block text-lg font-semibold">{`Hi, ${user.displayName || user.email
+                  }`}</span>
                 <button
                   onClick={() => {
                     handleSignOut();
                     setIsMenuOpen(false);
                   }}
-                  className="mt-4 flex items-center space-x-2 bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition-colors duration-300 w-full"
+                  className="mt-4 flex items-center space-x-2 bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition-colors duration-300"
                   aria-label="Sign out"
                 >
-                  <FaSignOutAlt/>
+                  <FaSignOutAlt />
                   <span>Sign Out</span>
                 </button>
               </>
             ) : (
               <Link to="/login">
                 <button
-                  className="mt-4 flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition-colors duration-300 w-full"
+                  className="mt-4 flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition-colors duration-300"
                   aria-label="Sign in"
                 >
-                  <FaSignInAlt/>
+                  <FaSignInAlt />
                   <span>Sign In</span>
                 </button>
               </Link>
@@ -526,7 +559,6 @@ const HomePage = () => {
         </div>
       </footer>
 
-      {/* Chatbot Floating Button */}
       <button
         onClick={toggleChatbot}
         className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 focus:outline-none"
@@ -534,59 +566,66 @@ const HomePage = () => {
         <FaCommentDots size={24} />
       </button>
 
-      {/* Chatbot Modal */}
       {isChatbotOpen && (
         <div
           className={`fixed bottom-20 right-1 border rounded-lg shadow-lg w-96 max-w-full z-50 ${isDarkMode
-              ? 'bg-gray-800 text-white border-gray-700'
-              : 'bg-white text-gray-900 border-gray-300'
+            ? "bg-gray-800 text-white border-gray-700"
+            : "bg-white text-gray-900 border-gray-300"
             }`}
         >
           <div
-            className={`flex justify-between items-center p-4 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'
+            className={`flex justify-between items-center p-4 border-b ${isDarkMode ? "border-gray-700" : "border-gray-200"
               }`}
           >
-            <h3 className="text-lg font-semibold">Chatbot Assistant</h3>
+            <h3 className="text-lg font-semibold">AI Assistant</h3>
             <button
               onClick={toggleChatbot}
               className={`focus:outline-none ${isDarkMode
-                  ? 'text-gray-400 hover:text-white'
-                  : 'text-gray-600 hover:text-gray-800'
+                ? "text-gray-400 hover:text-white"
+                : "text-gray-600 hover:text-gray-800"
                 }`}
             >
               &times;
             </button>
           </div>
           <div className="p-4 h-64 overflow-y-auto">
-            {chatHistory.map((chat, index) => (
+            {chatHistory.map((chat) => (
               <div
-                key={index}
-                className={`mb-4 ${chat.type === 'user' ? 'text-right' : 'text-left'
+                key={chat.id}
+                className={`mb-4 ${chat.type === "user" ? "text-right" : "text-left"
                   }`}
               >
-                {chat.type === 'bot' ? (
+                {chat.type === "bot" ? (
                   <div
-                    className={`prose prose-sm ${isDarkMode ? 'prose-invert' : ''
+                    className={`prose prose-sm ${isDarkMode ? "prose-invert" : ""
                       } inline-block p-2 rounded-lg ${isDarkMode
-                        ? 'bg-gray-700 text-white'
-                        : 'bg-gray-200 text-gray-900'
+                        ? "bg-gray-700 text-white"
+                        : "bg-gray-200 text-gray-900"
                       }`}
                   >
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                       {chat.message}
                     </ReactMarkdown>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {chat.timestamp.toLocaleTimeString()}
+                    </div>
                   </div>
                 ) : (
-                  <span className="inline-block p-2 rounded-lg bg-blue-600 text-white">
-                    {chat.message}
-                  </span>
+                  <div className="inline-block">
+                    <span className="inline-block p-2 rounded-lg bg-blue-600 text-white">
+                      {chat.message}
+                    </span>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {chat.timestamp.toLocaleTimeString()}
+                    </div>
+                  </div>
                 )}
               </div>
             ))}
           </div>
           <form
             onSubmit={handleChatSubmit}
-            className={`flex p-4 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'
+            className={`flex p-4 border-t ${isDarkMode ? "border-gray-700" : "border-gray-200"
               }`}
           >
             <input
@@ -594,7 +633,9 @@ const HomePage = () => {
               value={chatMessage}
               onChange={(e) => setChatMessage(e.target.value)}
               placeholder="Ask me anything about fitness..."
-              className={`flex-grow p-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-600 ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'
+              className={`flex-grow p-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-600 ${isDarkMode
+                ? "bg-gray-700 text-white border-gray-600"
+                : "bg-white text-gray-900 border-gray-300"
                 }`}
             />
             <button
