@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { FaDumbbell, FaRedo, FaBed, FaRandom, FaSignOutAlt } from "react-icons/fa";
+import { FaDumbbell, FaRedo, FaBed, FaRandom, FaSignOutAlt, FaCommentDots } from "react-icons/fa";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { FaSignInAlt } from "react-icons/fa";
 import { IoMdFitness, IoMdNutrition } from "react-icons/io";
 import { GiAchievement } from "react-icons/gi";
-import { FiMenu, FiSun, FiMoon } from "react-icons/fi";
-import { auth } from './firebase';
+import { FiMenu, FiSun, FiMoon, FiSend } from "react-icons/fi";
+import { auth, database } from './firebase';
 import { signOut, onAuthStateChanged } from "firebase/auth";
-import { database } from "./firebase";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, onSnapshot, query, orderBy } from "firebase/firestore";
 import { ToastContainer, toast } from 'react-toastify';
 import Select from 'react-select';
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import 'react-toastify/dist/ReactToastify.css';
 
 const Workout = () => {
@@ -19,7 +20,9 @@ const Workout = () => {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
-  const collectionRef = collection(database, "workoutHistory");
+  const [isChatbotOpen, setIsChatbotOpen] = useState(false);
+  const [chatMessage, setChatMessage] = useState("");
+  const [chatHistory, setChatHistory] = useState([]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -31,6 +34,110 @@ const Workout = () => {
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
+  };
+  useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+
+      if (currentUser) {
+        // Set up Firestore listener for chat messages
+        const chatRef = collection(database, `users/${currentUser.uid}/chats`);
+        const q = query(chatRef, orderBy("timestamp", "asc"));
+
+        const unsubscribeChats = onSnapshot(q, (snapshot) => {
+          const chats = snapshot.docs.map((doc) => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              type: data.type,
+              message: data.message,
+              timestamp: data.timestamp?.toDate() || new Date(),
+            };
+          });
+          setChatHistory(chats);
+        });
+
+        return () => {
+          unsubscribeChats();
+        };
+      } else {
+        // Clear chat history when user signs out
+        setChatHistory([]);
+      }
+    });
+
+    return () => {
+      // Clean up authentication listener
+      if (unsubscribeAuth) {
+        unsubscribeAuth();
+      }
+    };
+  }, []);
+
+  // Handler to toggle chatbot
+  const toggleChatbot = () => {
+    setIsChatbotOpen(!isChatbotOpen);
+  };
+
+  // Handler for chat message submission
+  const handleChatSubmit = async (e) => {
+    e.preventDefault();
+
+    if (chatMessage.trim() === "") {
+      toast.error("Please enter a message before sending.");
+      return;
+    }
+
+    if (!user) {
+      toast.error("You need to login first to send a message.");
+      return;
+    }
+
+    try {
+      const userMessageData = {
+        message: chatMessage,
+        type: "user",
+        timestamp: serverTimestamp(),
+      };
+
+      // Save user's message to Firestore
+      await addDoc(
+        collection(database, `users/${user.uid}/chats`),
+        userMessageData
+      );
+
+      // Send user's message to the chatbot server
+      const response = await fetch("http://localhost:5000/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message: chatMessage }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const data = await response.json();
+
+      const botMessageData = {
+        message: data.response,
+        type: "bot",
+        timestamp: serverTimestamp(),
+      };
+
+      // Save chatbot's response to Firestore
+      await addDoc(
+        collection(database, `users/${user.uid}/chats`),
+        botMessageData
+      );
+
+      setChatMessage("");
+    } catch (error) {
+      console.error("Error submitting chat:", error);
+      toast.error("Error submitting chat: " + error.message);
+    }
   };
 
   const handleSignOut = () => {
@@ -314,6 +421,112 @@ const Workout = () => {
       {activeTab === "adjust" && <AdjustWorkout onAdjustWorkout={handleAdjustWorkout} isDarkMode={isDarkMode} />}
       {activeTab === "rest" && <RestDays onSetRestDay={handleSetRestDay} isDarkMode={isDarkMode} />}
       {activeTab === "variations" && <ExerciseVariations onSelectVariation={handleExerciseVariation} isDarkMode={isDarkMode} />}
+
+      <button
+        onClick={toggleChatbot}
+        className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 focus:outline-none"
+        aria-label="Open chatbot"
+      >
+        <FaCommentDots size={24} />
+      </button>
+
+      {isChatbotOpen && (
+        <div
+          className={`fixed bottom-20 right-1 border rounded-lg shadow-lg w-96 max-w-full z-50 ${
+            isDarkMode
+              ? "bg-gray-800 text-white border-gray-700"
+              : "bg-white text-gray-900 border-gray-300"
+          }`}
+        >
+          <div
+            className={`flex justify-between items-center p-4 border-b ${
+              isDarkMode ? "border-gray-700" : "border-gray-200"
+            }`}
+          >
+            <h3 className="text-lg font-semibold">AI Assistant</h3>
+            <button
+              onClick={toggleChatbot}
+              className={`focus:outline-none ${
+                isDarkMode
+                  ? "text-gray-400 hover:text-white"
+                  : "text-gray-600 hover:text-gray-800"
+              }`}
+              aria-label="Close chatbot"
+            >
+              &times;
+            </button>
+          </div>
+          <div className="p-4 h-64 overflow-y-auto">
+            {chatHistory.map((chat) => (
+              <div
+                key={chat.id}
+                className={`mb-4 ${
+                  chat.type === "user" ? "text-right" : "text-left"
+                }`}
+              >
+                {chat.type === "bot" ? (
+                  <div
+                    className={`prose prose-sm ${
+                      isDarkMode ? "prose-invert" : ""
+                    } inline-block p-2 rounded-lg ${
+                      isDarkMode
+                        ? "bg-gray-700 text-white"
+                        : "bg-gray-200 text-gray-900"
+                    }`}
+                  >
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {chat.message}
+                    </ReactMarkdown>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {chat.timestamp.toLocaleTimeString()}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="inline-block">
+                    <span
+                      className={`inline-block p-2 rounded-lg ${
+                        isDarkMode
+                          ? "bg-blue-600 text-white"
+                          : "bg-blue-500 text-white"
+                      }`}
+                    >
+                      {chat.message}
+                    </span>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {chat.timestamp.toLocaleTimeString()}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <form
+            onSubmit={handleChatSubmit}
+            className={`flex p-4 border-t ${
+              isDarkMode ? "border-gray-700" : "border-gray-200"
+            }`}
+          >
+            <input
+              type="text"
+              value={chatMessage}
+              onChange={(e) => setChatMessage(e.target.value)}
+              placeholder="Ask me anything about fitness..."
+              className={`flex-grow p-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-600 ${
+                isDarkMode
+                  ? "bg-gray-700 text-white border-gray-600"
+                  : "bg-white text-gray-900 border-gray-300"
+              }`}
+            />
+            <button
+              type="submit"
+              className="bg-blue-600 text-white p-2 rounded-r-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 transition duration-300"
+              aria-label="Send message"
+            >
+              <FiSend size={20} />
+            </button>
+          </form>
+        </div>
+      )}
     </div>
   );
 };
