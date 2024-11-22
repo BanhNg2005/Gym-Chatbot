@@ -10,6 +10,7 @@ import { signOut, onAuthStateChanged } from "firebase/auth";
 import { database } from "./firebase";
 import { collection, addDoc } from "firebase/firestore";
 import { ToastContainer, toast } from 'react-toastify';
+import Select from 'react-select';
 import 'react-toastify/dist/ReactToastify.css';
 
 const Workout = () => {
@@ -327,6 +328,15 @@ const TabButton = ({ icon, label, active, onClick, isDarkMode }) => (
   </button>
 );
 
+const muscleGroupOptions = [
+  { value: 'Chest', label: 'Chest' },
+  { value: 'Back', label: 'Back' },
+  { value: 'Legs', label: 'Legs' },
+  { value: 'Arms', label: 'Arms' },
+  { value: 'Shoulders', label: 'Shoulders' },
+  { value: 'Core', label: 'Core' },
+];
+
 const CreateWorkoutPlan = ({ onCreateWorkout, isDarkMode }) => {
   const [workoutType, setWorkoutType] = useState("");
   const [duration, setDuration] = useState("");
@@ -370,6 +380,7 @@ const CreateWorkoutPlan = ({ onCreateWorkout, isDarkMode }) => {
             <option value="strength">Strength Training</option>
             <option value="cardio">Cardio</option>
             <option value="flexibility">Flexibility</option>
+            <option value="balance">Balance</option>
           </select>
           {errors.workoutType && <p className="text-red-500 text-xs italic">{errors.workoutType}</p>}
         </div>
@@ -388,26 +399,42 @@ const CreateWorkoutPlan = ({ onCreateWorkout, isDarkMode }) => {
         </div>
         <div className="mb-4">
           <label className={`block text-sm font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-black'}`}>Muscle Groups</label>
-          <div className="flex flex-wrap">
-            {["Chest", "Back", "Legs", "Arms", "Shoulders", "Core"].map((group) => (
-              <label key={group} className="inline-flex items-center mr-4 mb-2">
-                <input
-                  type="checkbox"
-                  className="form-checkbox text-purple-500"
-                  value={group}
-                  checked={muscleGroups.includes(group)}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setMuscleGroups([...muscleGroups, group]);
-                    } else {
-                      setMuscleGroups(muscleGroups.filter((item) => item !== group));
-                    }
-                  }}
-                />
-                <span className={`ml-2 ${isDarkMode ? 'text-white' : 'text-black'}`}>{group}</span>
-              </label>
-            ))}
-          </div>
+          <Select
+            isMulti
+            options={muscleGroupOptions}
+            className={`react-select-container ${errors.muscleGroups ? 'border border-red-500' : ''}`}
+            classNamePrefix="react-select"
+            value={muscleGroups}
+            onChange={(selectedOptions) => setMuscleGroups(selectedOptions)}
+            styles={{
+              control: (provided) => ({
+                ...provided,
+                backgroundColor: isDarkMode ? '#374151' : '#E5E7EB',
+                color: isDarkMode ? '#fff' : '#000',
+              }),
+              menu: (provided) => ({
+                ...provided,
+                backgroundColor: isDarkMode ? '#374151' : '#fff',
+              }),
+              multiValue: (provided) => ({
+                ...provided,
+                backgroundColor: isDarkMode ? '#4B5563' : '#D1D5DB',
+              }),
+              multiValueLabel: (provided) => ({
+                ...provided,
+                color: isDarkMode ? '#fff' : '#000',
+              }),
+              multiValueRemove: (provided) => ({
+                ...provided,
+                color: isDarkMode ? '#fff' : '#000',
+                ':hover': {
+                  backgroundColor: isDarkMode ? '#9CA3AF' : '#D1D5DB',
+                  color: '#fff',
+                },
+              }),
+            }}
+            placeholder="Select Muscle Groups"
+          />
           {errors.muscleGroups && <p className="text-red-500 text-xs italic">{errors.muscleGroups}</p>}
         </div>
         <button
@@ -553,16 +580,28 @@ const ExerciseVariations = ({ onSelectVariation, isDarkMode }) => {
       name: "Planks",
       variations: [
         {
-          name: "Forearm plank", image: require("./templates/PlankForearm.jpg"),
-          description: "One of the most common ways to perform a plank, is slightly easier than holding your body up with just your hands.\n\nPlace forearms on the floor with elbows aligned below shoulders and arms parallel to your body at about shoulder width. If flat palms bother your wrists, clasp your hands together."
+          name: "Forearm plank",
+          image: require("./templates/PlankForearm.jpg"),
+          description:
+            "One of the most common ways to perform a plank, is slightly easier than holding your body up with just your hands.\n\nPlace forearms on the floor with elbows aligned below shoulders and arms parallel to your body at about shoulder width. If flat palms bother your wrists, clasp your hands together.",
+          suggestedRepsSets: "3 sets of 60 seconds",
+          caloriesBurned: "5 calories per minute",
         },
         {
-          name: "Side plank", image: require("./templates/SidePlank.jpg"),
-          description: "This core exercise targets your obliques, shoulders, glutes, and legs. Start by lying on your side with legs stacked and prop yourself up on your elbow or hand. Engage your core, lift your hips, and keep your body in a straight line. To make it harder, raise your top arm or leg, or both. For more support, cross your top leg in front of your body. Hold and maintain alignment for maximum benefit."
+          name: "Side plank",
+          image: require("./templates/SidePlank.jpg"),
+          description:
+            "This core exercise targets your obliques, shoulders, glutes, and legs. Start by lying on your side with legs stacked and prop yourself up on your elbow or hand. Engage your core, lift your hips, and keep your body in a straight line. To make it harder, raise your top arm or leg, or both. For more support, cross your top leg in front of your body. Hold and maintain alignment for maximum benefit.",
+          suggestedRepsSets: "3 sets of 45 seconds each side",
+          caloriesBurned: "4 calories per minute",
         },
         {
-          name: "Plank shoulder taps", image: require("./templates/PlankShoulderTaps.jpg"),
-          description: "This plank variation adds a dynamic element to the exercise, challenging your core and shoulder stability. Start in a high plank position with hands directly under shoulders and feet hip-width apart. Keeping your hips square to the floor, lift one hand and tap the opposite shoulder. Return to the starting position and repeat on the other side. Continue alternating sides while maintaining a strong plank position."
+          name: "Plank shoulder taps",
+          image: require("./templates/PlankShoulderTaps.jpg"),
+          description:
+            "This plank variation adds a dynamic element to the exercise, challenging your core and shoulder stability. Start in a high plank position with hands directly under shoulders and feet hip-width apart. Keeping your hips square to the floor, lift one hand and tap the opposite shoulder. Return to the starting position and repeat on the other side. Continue alternating sides while maintaining a strong plank position.",
+          suggestedRepsSets: "3 sets of 20 taps",
+          caloriesBurned: "6 calories per minute",
         },
       ],
     },
@@ -571,18 +610,70 @@ const ExerciseVariations = ({ onSelectVariation, isDarkMode }) => {
       variations: [
         {
           name: "Barbell back squat", image: require("./templates/BackSquat.jpg"),
-          description: "This compound movement strengthens your quads, core, and glutes. Start by positioning the barbell on the front of your shoulders, keeping your elbows up and chest high. Stand with feet shoulder-width apart, then lower your body into a squat by bending at the hips and knees. Keep your back straight and core tight. Push through your heels to return to standing. Ensure the barbell stays stable and your torso upright throughout."
+          description: "This compound movement strengthens your quads, core, and glutes. Start by positioning the barbell on the front of your shoulders, keeping your elbows up and chest high. Stand with feet shoulder-width apart, then lower your body into a squat by bending at the hips and knees. Keep your back straight and core tight. Push through your heels to return to standing. Ensure the barbell stays stable and your torso upright throughout.",
+          suggestedRepsSets: "3 sets of 10 reps",
+          caloriesBurned: "8 calories per minute",
         },
         {
           name: "Dumbbell squat", image: require("./templates/DumbbellSquat.jpg"),
-          description: "This compound movement strengthens your quads, glutes, hamstrings, and core. Start by holding a dumbbell in each hand at your sides or at shoulder level. Stand with feet shoulder-width apart, then lower your body into a squat by bending at the hips and knees. Keep your chest up, back straight, and core tight. Push through your heels to return to standing. Ensure your posture stays upright throughout the movement."
+          description: "This compound movement strengthens your quads, glutes, hamstrings, and core. Start by holding a dumbbell in each hand at your sides or at shoulder level. Stand with feet shoulder-width apart, then lower your body into a squat by bending at the hips and knees. Keep your chest up, back straight, and core tight. Push through your heels to return to standing. Ensure your posture stays upright throughout the movement.",
+          suggestedRepsSets: "3 sets of 12 reps",
+          caloriesBurned: "6 calories per minute",
         },
         {
           name: "Sumo squat", image: require("./templates/SumoSquat.jpg"),
-          description: "This compound movement targets your inner thighs, glutes, and quads. Begin by standing with feet wider than shoulder-width apart and toes pointing outward. Hold a dumbbell or kettlebell with both hands in front of your hips. Lower your body into a squat by bending at the hips and knees. Keep your chest up, back straight, and core engaged. Press through your heels to return to standing, maintaining stability in your torso throughout."
+          description: "This compound movement targets your inner thighs, glutes, and quads. Begin by standing with feet wider than shoulder-width apart and toes pointing outward. Hold a dumbbell or kettlebell with both hands in front of your hips. Lower your body into a squat by bending at the hips and knees. Keep your chest up, back straight, and core engaged. Press through your heels to return to standing, maintaining stability in your torso throughout.",
+          suggestedRepsSets: "3 sets of 15 reps",
+          caloriesBurned: "7 calories per minute",
         },
       ],
     },
+    {
+      name: "Push-ups",
+      variations: [
+        {
+          name: "Standard push-up", image: require("./templates/PushupStandard.jpg"),
+          description: "This classic bodyweight exercise targets your chest, shoulders, triceps, and core. Start in a high plank position with hands directly under shoulders and feet hip-width apart. Lower your body by bending your elbows, keeping them close to your sides. Push back up to the starting position, maintaining a straight line from head to heels. Modify by dropping to your knees or elevating your hands on a bench.",
+          suggestedRepsSets: "3 sets of 12 reps",
+          caloriesBurned: "4 calories per minute",
+        },
+        {
+          name: "Incline push-up", image: require("./templates/PushupIncline.jpg"),
+          description: "This push-up variation is easier than the standard version and targets your chest, shoulders, and triceps. Start in a high plank position with hands on an elevated surface, such as a bench or step. Lower your body by bending your elbows, keeping them close to your sides. Push back up to the starting position, maintaining a straight line from head to heels. Increase the incline for added difficulty.",
+          suggestedRepsSets: "3 sets of 10 reps",
+          caloriesBurned: "3 calories per minute",
+        },
+        {
+          name: "Diamond push-up", image: require("./templates/PushupDiamond.jpg"),
+          description: "This push-up variation targets your triceps, chest, and shoulders. Start in a high plank position with hands close together under your chest, forming a diamond shape with your thumbs and index fingers. Lower your body by bending your elbows, keeping them close to your sides. Push back up to the starting position, maintaining a straight line from head to heels. Modify by dropping to your knees or elevating your hands on a bench.",
+          suggestedRepsSets: "3 sets of 8 reps",
+          caloriesBurned: "5 calories per minute",
+        },
+      ],
+    },
+    {
+      name: "Lunges",
+      variations: [
+        {
+          name: "Forward lunge", image: require("./templates/LungeForward.jpg"),
+          description: "This lower body exercise targets your quads, hamstrings, and glutes. Start by standing with feet hip-width apart. Take a big step forward with one leg and lower your body until both knees are bent at a 90-degree angle. Keep your front knee over your ankle and your back knee hovering just above the floor without touching. Push through your front heel to return to standing. Repeat on the other side.",
+          suggestedRepsSets: "3 sets of 12 reps each leg",
+          caloriesBurned: "6 calories per minute",
+        },
+        {
+          name: "Wide lunge", image: require("./templates/LungeWide.jpg"),
+          description: "This lunge variation targets your inner thighs, quads, hamstrings, and glutes. Start by standing with feet wider than hip-width apart. Take a big step to one side and lower your body into a lunge, bending the knee of the leading leg while keeping the other leg straight. Push through your heel to return to standing. Repeat on the other side. Maintain a straight back and engage your core throughout.",
+          suggestedRepsSets: "3 sets of 10 reps each leg",
+          caloriesBurned: "5 calories per minute",
+        },
+        {
+          name: "Walking lunge", image: require("./templates/LungeWalking.jpg"),
+          description: "This dynamic lunge variation targets your quads, hamstrings, and glutes. Start by standing with feet hip-width apart. Take a big step forward with one leg and lower your body until both knees are bent at a 90-degree angle. Push through your front heel to return to standing and immediately step forward with the other leg. Continue walking forward, alternating legs with each step.",
+          suggestedRepsSets: "3 sets of 20 steps",
+          caloriesBurned: "7 calories per minute",
+        },
+      ],
+    }
   ];
 
   return (
@@ -618,6 +709,8 @@ const ExerciseVariations = ({ onSelectVariation, isDarkMode }) => {
                 <img src={variation.image} alt={variation.name} className="w-full h-45 object-cover rounded-lg mb-2" />
                 <h4 className="font-semibold mb-2">{variation.name}</h4>
                 {variation.description && <p className="text-sm mb-2">{variation.description}</p>}
+                <p className="text-sm mb-1"><strong>Suggested Reps/Sets:</strong> {variation.suggestedRepsSets}</p>
+                <p className="text-sm mb-2"><strong>Calories Burned:</strong> {variation.caloriesBurned}</p>
                 <button
                   className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-3xl focus:outline-none focus:shadow-outline"
                   onClick={() => onSelectVariation(selectedExercise.name, variation.name)}
