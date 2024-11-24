@@ -364,15 +364,49 @@ const HomePage = () => {
 
         <section className="mt-36 mb-12">
           <h2 className="text-3xl font-semibold mb-6 text-center">About Us</h2>
-          <div
-            className={`${isDarkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"
-              } p-6 rounded-lg shadow-lg max-w-4xl mx-auto`}
-          >
-            <p className="text-lg leading-relaxed">
-              Welcome to <strong>DREAMS Fitness</strong>! We are dedicated to helping you achieve your
-              fitness goals through personalized workouts, nutritional advice, and ongoing support.
-              Our mission is to empower you to live a healthier, happier life.
-            </p>
+          <div className="flex min-h-screen items-center justify-center gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+              <div className="group relative items-center justify-center overflow-hidden cursor-pointer hover-shadow-x1 hover:shadow-black/30 transition-shadow">
+                <div className="h-96 w-72">
+                  <img className="w-full h-full object-cover group-hover:rotate-3 group-hover:scale-125 transition-transform duration-500" src={require("./templates/about1.jpg")} alt="About 1" />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black group-hover:from-black/70 group-hover:via-black/60 group-hover:to-black/70"></div> {/* background overlay */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center px-9 text-center translate-y-[45%] group-hover:translate-y-0 transition-all duration-500">
+                  <h1 className="font-serif text-2xl font-bold text-white">Who Are We?</h1>
+                  <p className="text-lg italic text-white mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">This is just a text</p>
+                </div>
+              </div>
+              <div className="group relative items-center justify-center overflow-hidden cursor-pointer hover-shadow-x1 hover:shadow-black/30 transition-shadow">
+                <div className="h-96 w-72">
+                  <img className="w-full h-full object-cover group-hover:rotate-3 group-hover:scale-125 transition-transform duration-500" src={require("./templates/about1.jpg")} alt="About 1" />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black group-hover:from-black/70 group-hover:via-black/60 group-hover:to-black/70"></div> {/* background overlay */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center px-9 text-center translate-y-[45%] group-hover:translate-y-0 transition-all duration-500">
+                  <h1 className="font-serif text-2xl font-bold text-white">Our Mission</h1>
+                  <p className="text-lg italic text-white mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">This is just a text</p>
+                </div>
+              </div>
+              <div className="group relative items-center justify-center overflow-hidden cursor-pointer hover-shadow-x1 hover:shadow-black/30 transition-shadow">
+                <div className="h-96 w-72">
+                  <img className="w-full h-full object-cover group-hover:rotate-3 group-hover:scale-125 transition-transform duration-500" src={require("./templates/about1.jpg")} alt="About 1" />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black group-hover:from-black/70 group-hover:via-black/60 group-hover:to-black/70"></div> {/* background overlay */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center px-9 text-center translate-y-[45%] group-hover:translate-y-0 transition-all duration-500">
+                  <h1 className="font-serif text-2xl font-bold text-white">Behind The Scene</h1>
+                  <p className="text-lg italic text-white mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">This is just a text</p>
+                </div>
+              </div>
+              <div className="group relative items-center justify-center overflow-hidden cursor-pointer hover-shadow-x1 hover:shadow-black/30 transition-shadow">
+                <div className="h-96 w-72">
+                  <img className="w-full h-full object-cover group-hover:rotate-3 group-hover:scale-125 transition-transform duration-500" src={require("./templates/about1.jpg")} alt="About 1" />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black group-hover:from-black/70 group-hover:via-black/60 group-hover:to-black/70"></div> {/* background overlay */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center px-9 text-center translate-y-[45%] group-hover:translate-y-0 transition-all duration-500">
+                  <h1 className="font-serif text-2xl font-bold text-white">Reviews</h1>
+                  <p className="text-lg italic text-white mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">"DREAMS Fitness has changed my life in my jounrey to a healthier, stronger, and more confident me!" - Jack Kieu</p>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -586,8 +620,8 @@ const HomePage = () => {
                   <div className="inline-block">
                     <span
                       className={`inline-block p-2 rounded-lg ${isDarkMode
-                          ? "bg-blue-600 text-white"
-                          : "bg-blue-500 text-white"
+                        ? "bg-blue-600 text-white"
+                        : "bg-blue-500 text-white"
                         }`}
                     >
                       {chat.message}
