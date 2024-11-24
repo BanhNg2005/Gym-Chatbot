@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAnalytics } from 'firebase/analytics';
-import { getAuth, GoogleAuthProvider, FacebookAuthProvider, GithubAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, FacebookAuthProvider, GithubAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, sendPasswordResetEmail} from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_API_KEY,
@@ -22,5 +22,5 @@ const googleProvider = new GoogleAuthProvider();
 const facebookProvider = new FacebookAuthProvider();
 const githubProvider = new GithubAuthProvider();
 
-export { auth, analytics, googleProvider, facebookProvider, githubProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup };
+export { auth, analytics, googleProvider, facebookProvider, githubProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, sendPasswordResetEmail };
 export const database = getFirestore(app);
