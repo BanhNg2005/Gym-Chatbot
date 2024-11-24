@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { FiMenu, FiSend, FiSun, FiMoon } from "react-icons/fi";
 import { FaBed, FaSignInAlt, FaSignOutAlt, FaAppleAlt, FaUtensils, FaCalendarAlt, FaClipboardList, FaCommentDots } from "react-icons/fa";
@@ -23,6 +23,7 @@ const Nutrition = () => {
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [errors, setErrors] = useState({ meal: "", calories: "" });
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
+  const messagesEndRef = useRef(null);
   const [chatMessage, setChatMessage] = useState("");
   const [chatHistory, setChatHistory] = useState([]);
 
@@ -101,6 +102,16 @@ const Nutrition = () => {
       }
     };
   }, []);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    if (isChatbotOpen) {
+      scrollToBottom();
+    }
+  }, [isChatbotOpen, chatHistory]);
 
   const toggleChatbot = () => {
     setIsChatbotOpen(!isChatbotOpen);
@@ -208,12 +219,12 @@ const Nutrition = () => {
 
   const handleDeleteMeal = async (id) => {
     if (!window.confirm("Are you sure you want to delete this meal?")) return;
-  
+
     try {
       if (!user) {
         throw new Error("User is not authenticated!");
       }
-  
+
       const mealDocRef = doc(database, `users/${user.uid}/nutrition/${id}`);
       await deleteDoc(mealDocRef);
       toast.success("Meal deleted successfully!");
@@ -241,7 +252,7 @@ const Nutrition = () => {
       };
 
       const nutritionCollection = collection(database, `users/${user.uid}/nutrition`);
-      const docRef = await addDoc(nutritionCollection, mealData); 
+      const docRef = await addDoc(nutritionCollection, mealData);
 
       toast.success("Meal logged successfully!");
 
@@ -278,9 +289,8 @@ const Nutrition = () => {
   ];
 
   return (
-    <div className={`min-h-screen ${
-      isDarkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"
-    } transition-colors duration-300 flex flex-col`}>
+    <div className={`min-h-screen ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"
+      } transition-colors duration-300 flex flex-col`}>
       <ToastContainer
         position="top-right"
         autoClose={5000}
@@ -293,13 +303,12 @@ const Nutrition = () => {
         pauseOnHover
       />
       <header
-        className={`py-4 ${
-          isDarkMode ? "bg-gray-800" : "bg-white"
-        } shadow-md sticky top-0 left-0 w-full p-4 z-50`}
+        className={`py-4 ${isDarkMode ? "bg-gray-800" : "bg-white"
+          } shadow-md sticky top-0 left-0 w-full p-4 z-50`}
       >
         <div className="container mx-auto flex justify-between items-center">
           <a href="/" className="text-2xl font-bold flex items-center">
-            <img src="/images/dreamslogo.png" alt="Dreams Logo" className="w-8 h-8 mr-2"/>
+            <img src="/images/dreamslogo.png" alt="Dreams Logo" className="w-8 h-8 mr-2" />
             DREAMS
           </a>
           <nav className="hidden md:block">
@@ -307,41 +316,37 @@ const Nutrition = () => {
               <li>
                 <Link
                   to="/workout"
-                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
+                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
                 >
-                  <IoMdFitness className="mr-2"/> Workout
+                  <IoMdFitness className="mr-2" /> Workout
                 </Link>
               </li>
               <li>
                 <Link
                   to="/nutrition"
-                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
+                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
                 >
-                  <IoMdNutrition className="mr-2"/> Nutrition
+                  <IoMdNutrition className="mr-2" /> Nutrition
                 </Link>
               </li>
               <li>
                 <Link
                   to="/sleep"
-                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
+                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
                 >
-                  <FaBed className="mr-2"/> Sleep
+                  <FaBed className="mr-2" /> Sleep
                 </Link>
               </li>
               <li>
                 <Link
                   to="/achievement"
-                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
+                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
                 >
-                  <GiAchievement className="mr-2"/> Achievement
+                  <GiAchievement className="mr-2" /> Achievement
                 </Link>
               </li>
             </ul>
@@ -350,15 +355,14 @@ const Nutrition = () => {
 
             {user ? (
               <>
-                <span className="text-lg font-semibold hidden md:block">{`Hi, ${
-                  user.displayName || user.email
-                }`}</span>
+                <span className="text-lg font-semibold hidden md:block">{`Hi, ${user.displayName || user.email
+                  }`}</span>
                 <button
                   onClick={handleSignOut}
                   className="hidden md:flex items-center space-x-2 bg-red-700 text-white px-4 py-2 rounded-full hover:bg-red-500 transition-colors duration-300"
                   aria-label="Sign out"
                 >
-                  <FaSignOutAlt/>
+                  <FaSignOutAlt />
                   <span>Sign Out</span>
                 </button>
               </>
@@ -368,26 +372,25 @@ const Nutrition = () => {
                   className="hidden md:flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition-colors duration-300"
                   aria-label="Sign in"
                 >
-                  <FaSignInAlt/>
+                  <FaSignInAlt />
                   <span>Sign In</span>
                 </button>
               </Link>
             )}
             <button
               onClick={toggleDarkMode}
-              className={`p-2 rounded-full ${
-                isDarkMode ? "bg-yellow-400" : "bg-gray-200"
-              }`}
+              className={`p-2 rounded-full ${isDarkMode ? "bg-yellow-400" : "bg-gray-200"
+                }`}
               aria-label="Toggle dark mode"
             >
-              {isDarkMode ? <FiSun className="text-gray-900"/> : <FiMoon/>}
+              {isDarkMode ? <FiSun className="text-gray-900" /> : <FiMoon />}
             </button>
             <button
               onClick={toggleMenu}
               className="md:hidden p-2 rounded-full bg-gray-200"
               aria-label="Toggle menu"
             >
-              <FiMenu/>
+              <FiMenu />
             </button>
           </div>
         </div>
@@ -400,7 +403,7 @@ const Nutrition = () => {
                     to="/workout"
                     className="py-2 hover:text-blue-500 transition-colors duration-300 flex items-center"
                   >
-                    <IoMdFitness className="mr-2"/> Workout
+                    <IoMdFitness className="mr-2" /> Workout
                   </Link>
                 </li>
                 <li>
@@ -408,7 +411,7 @@ const Nutrition = () => {
                     to="/nutrition"
                     className="py-2 hover:text-blue-500 transition-colors duration-300 flex items-center"
                   >
-                    <IoMdNutrition className="mr-2"/> Nutrition
+                    <IoMdNutrition className="mr-2" /> Nutrition
                   </Link>
                 </li>
                 <li>
@@ -416,7 +419,7 @@ const Nutrition = () => {
                     to="/sleep"
                     className="py-2 hover:text-blue-500 transition-colors duration-300 flex items-center"
                   >
-                    <FaBed className="mr-2"/> Sleep
+                    <FaBed className="mr-2" /> Sleep
                   </Link>
                 </li>
                 <li>
@@ -424,16 +427,15 @@ const Nutrition = () => {
                     to="/achievement"
                     className="py-2 hover:text-blue-500 transition-colors duration-300 flex items-center"
                   >
-                    <GiAchievement className="mr-2"/> Achievement
+                    <GiAchievement className="mr-2" /> Achievement
                   </Link>
                 </li>
               </ul>
             </nav>
             {user ? (
               <>
-                <span className="mt-4 block text-lg font-semibold">{`Hi, ${
-                  user.displayName || user.email
-                }`}</span>
+                <span className="mt-4 block text-lg font-semibold">{`Hi, ${user.displayName || user.email
+                  }`}</span>
                 <button
                   onClick={() => {
                     handleSignOut();
@@ -442,7 +444,7 @@ const Nutrition = () => {
                   className="mt-4 flex items-center space-x-2 bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition-colors duration-300 w-full"
                   aria-label="Sign out"
                 >
-                  <FaSignOutAlt/>
+                  <FaSignOutAlt />
                   <span>Sign Out</span>
                 </button>
               </>
@@ -452,7 +454,7 @@ const Nutrition = () => {
                   className="mt-4 flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition-colors duration-300 w-full"
                   aria-label="Sign in"
                 >
-                  <FaSignInAlt/>
+                  <FaSignInAlt />
                   <span>Sign In</span>
                 </button>
               </Link>
@@ -471,25 +473,22 @@ const Nutrition = () => {
 
       {isChatbotOpen && (
         <div
-          className={`fixed bottom-20 right-1 border rounded-lg shadow-lg w-96 max-w-full z-50 ${
-            isDarkMode
-              ? "bg-gray-800 text-white border-gray-700"
-              : "bg-white text-gray-900 border-gray-300"
-          }`}
+          className={`fixed bottom-20 right-1 border rounded-lg shadow-lg w-96 max-w-full z-50 ${isDarkMode
+            ? "bg-gray-800 text-white border-gray-700"
+            : "bg-white text-gray-900 border-gray-300"
+            }`}
         >
           <div
-            className={`flex justify-between items-center p-4 border-b ${
-              isDarkMode ? "border-gray-700" : "border-gray-200"
-            }`}
+            className={`flex justify-between items-center p-4 border-b ${isDarkMode ? "border-gray-700" : "border-gray-200"
+              }`}
           >
             <h3 className="text-lg font-semibold">AI Assistant</h3>
             <button
               onClick={toggleChatbot}
-              className={`focus:outline-none ${
-                isDarkMode
-                  ? "text-gray-400 hover:text-white"
-                  : "text-gray-600 hover:text-gray-800"
-              }`}
+              className={`focus:outline-none ${isDarkMode
+                ? "text-gray-400 hover:text-white"
+                : "text-gray-600 hover:text-gray-800"
+                }`}
               aria-label="Close chatbot"
             >
               &times;
@@ -499,19 +498,12 @@ const Nutrition = () => {
             {chatHistory.map((chat) => (
               <div
                 key={chat.id}
-                className={`mb-4 ${
-                  chat.type === "user" ? "text-right" : "text-left"
-                }`}
+                className={`mb-4 ${chat.type === "user" ? "text-right" : "text-left"}`}
               >
                 {chat.type === "bot" ? (
                   <div
-                    className={`prose prose-sm ${
-                      isDarkMode ? "prose-invert" : ""
-                    } inline-block p-2 rounded-lg ${
-                      isDarkMode
-                        ? "bg-gray-700 text-white"
-                        : "bg-gray-200 text-gray-900"
-                    }`}
+                    className={`prose prose-sm ${isDarkMode ? "prose-invert" : ""} inline-block p-2 rounded-lg ${isDarkMode ? "bg-gray-700 text-white" : "bg-gray-200 text-gray-900"
+                      }`}
                   >
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                       {chat.message}
@@ -523,11 +515,10 @@ const Nutrition = () => {
                 ) : (
                   <div className="inline-block">
                     <span
-                      className={`inline-block p-2 rounded-lg ${
-                        isDarkMode
+                      className={`inline-block p-2 rounded-lg ${isDarkMode
                           ? "bg-blue-600 text-white"
                           : "bg-blue-500 text-white"
-                      }`}
+                        }`}
                     >
                       {chat.message}
                     </span>
@@ -538,23 +529,22 @@ const Nutrition = () => {
                 )}
               </div>
             ))}
+            <div ref={messagesEndRef} />
           </div>
           <form
             onSubmit={handleChatSubmit}
-            className={`flex p-4 border-t ${
-              isDarkMode ? "border-gray-700" : "border-gray-200"
-            }`}
+            className={`flex p-4 border-t ${isDarkMode ? "border-gray-700" : "border-gray-200"
+              }`}
           >
             <input
               type="text"
               value={chatMessage}
               onChange={(e) => setChatMessage(e.target.value)}
               placeholder="Ask me anything about fitness..."
-              className={`flex-grow p-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-600 ${
-                isDarkMode
-                  ? "bg-gray-700 text-white border-gray-600"
-                  : "bg-white text-gray-900 border-gray-300"
-              }`}
+              className={`flex-grow p-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-600 ${isDarkMode
+                ? "bg-gray-700 text-white border-gray-600"
+                : "bg-white text-gray-900 border-gray-300"
+                }`}
             />
             <button
               type="submit"

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FaDumbbell, FaRedo, FaBed, FaRandom, FaSignOutAlt, FaCommentDots } from "react-icons/fa";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { FaSignInAlt } from "react-icons/fa";
@@ -23,6 +23,7 @@ const Workout = () => {
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const [chatMessage, setChatMessage] = useState("");
   const [chatHistory, setChatHistory] = useState([]);
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -71,6 +72,16 @@ const Workout = () => {
       }
     };
   }, []);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    if (isChatbotOpen) {
+      scrollToBottom();
+    }
+  }, [isChatbotOpen, chatHistory]);
 
   const toggleChatbot = () => {
     setIsChatbotOpen(!isChatbotOpen);
@@ -148,17 +159,17 @@ const Workout = () => {
       if (!user) {
         throw new Error("User is not authenticated! Please sign in to save your workout plan.");
       }
-  
+
       const workoutData = {
         workoutType: plan.workoutType,
-        duration: parseInt(plan.duration, 10), 
+        duration: parseInt(plan.duration, 10),
         muscleGroups: plan.muscleGroups.map((mg) => ({
           label: mg.label,
           value: mg.value,
         })),
         timestamp: serverTimestamp(),
       };
-  
+
       const docRef = await addDoc(collection(database, `users/${user.uid}/workoutPlans`), workoutData);
       toast.success("Workout plan saved successfully!");
     } catch (error) {
@@ -221,9 +232,8 @@ const Workout = () => {
   };
 
   return (
-    <div className={`min-h-screen ${
-      isDarkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"
-    } transition-colors duration-300 flex flex-col`}>
+    <div className={`min-h-screen ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"
+      } transition-colors duration-300 flex flex-col`}>
       <ToastContainer
         position="top-right"
         autoClose={5000}
@@ -235,14 +245,13 @@ const Workout = () => {
         draggable
         pauseOnHover
       />
-      
+
       <header
-        className={`py-4 ${
-          isDarkMode ? "bg-gray-800" : "bg-white"
-        } shadow-md sticky top-0 left-0 w-full p-4 z-50`}
+        className={`py-4 ${isDarkMode ? "bg-gray-800" : "bg-white"
+          } shadow-md sticky top-0 left-0 w-full p-4 z-50`}
       >
         <div className="container mx-auto flex justify-between items-center">
-        <a href="/" className="text-2xl font-bold flex items-center">
+          <a href="/" className="text-2xl font-bold flex items-center">
             <img src="/images/dreamslogo.png" alt="Dreams Logo" className="w-8 h-8 mr-2" />
             DREAMS
           </a>
@@ -251,9 +260,8 @@ const Workout = () => {
               <li>
                 <Link
                   to="/workout"
-                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
+                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
                 >
                   <IoMdFitness className="mr-2" /> Workout
                 </Link>
@@ -261,9 +269,8 @@ const Workout = () => {
               <li>
                 <Link
                   to="/nutrition"
-                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
+                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
                 >
                   <IoMdNutrition className="mr-2" /> Nutrition
                 </Link>
@@ -271,9 +278,8 @@ const Workout = () => {
               <li>
                 <Link
                   to="/sleep"
-                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
+                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
                 >
                   <FaBed className="mr-2" /> Sleep
                 </Link>
@@ -281,9 +287,8 @@ const Workout = () => {
               <li>
                 <Link
                   to="/achievement"
-                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
+                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
                 >
                   <GiAchievement className="mr-2" /> Achievement
                 </Link>
@@ -291,12 +296,11 @@ const Workout = () => {
             </ul>
           </nav>
           <div className="flex items-center space-x-4">
-            
+
             {user ? (
               <>
-                <span className="text-lg font-semibold hidden md:block">{`Hi, ${
-                  user.displayName || user.email
-                }`}</span>
+                <span className="text-lg font-semibold hidden md:block">{`Hi, ${user.displayName || user.email
+                  }`}</span>
                 <button
                   onClick={handleSignOut}
                   className="hidden md:flex items-center space-x-2 bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition-colors duration-300"
@@ -319,9 +323,8 @@ const Workout = () => {
             )}
             <button
               onClick={toggleDarkMode}
-              className={`p-2 rounded-full ${
-                isDarkMode ? "bg-yellow-400" : "bg-gray-200"
-              }`}
+              className={`p-2 rounded-full ${isDarkMode ? "bg-yellow-400" : "bg-gray-200"
+                }`}
               aria-label="Toggle dark mode"
             >
               {isDarkMode ? <FiSun className="text-gray-900" /> : <FiMoon />}
@@ -375,9 +378,8 @@ const Workout = () => {
             </nav>
             {user ? (
               <>
-                <span className="mt-4 block text-lg font-semibold">{`Hi, ${
-                  user.displayName || user.email
-                }`}</span>
+                <span className="mt-4 block text-lg font-semibold">{`Hi, ${user.displayName || user.email
+                  }`}</span>
                 <button
                   onClick={() => {
                     handleSignOut();
@@ -427,25 +429,22 @@ const Workout = () => {
 
       {isChatbotOpen && (
         <div
-          className={`fixed bottom-20 right-1 border rounded-lg shadow-lg w-96 max-w-full z-50 ${
-            isDarkMode
-              ? "bg-gray-800 text-white border-gray-700"
-              : "bg-white text-gray-900 border-gray-300"
-          }`}
+          className={`fixed bottom-20 right-1 border rounded-lg shadow-lg w-96 max-w-full z-50 ${isDarkMode
+            ? "bg-gray-800 text-white border-gray-700"
+            : "bg-white text-gray-900 border-gray-300"
+            }`}
         >
           <div
-            className={`flex justify-between items-center p-4 border-b ${
-              isDarkMode ? "border-gray-700" : "border-gray-200"
-            }`}
+            className={`flex justify-between items-center p-4 border-b ${isDarkMode ? "border-gray-700" : "border-gray-200"
+              }`}
           >
             <h3 className="text-lg font-semibold">AI Assistant</h3>
             <button
               onClick={toggleChatbot}
-              className={`focus:outline-none ${
-                isDarkMode
-                  ? "text-gray-400 hover:text-white"
-                  : "text-gray-600 hover:text-gray-800"
-              }`}
+              className={`focus:outline-none ${isDarkMode
+                ? "text-gray-400 hover:text-white"
+                : "text-gray-600 hover:text-gray-800"
+                }`}
               aria-label="Close chatbot"
             >
               &times;
@@ -455,19 +454,12 @@ const Workout = () => {
             {chatHistory.map((chat) => (
               <div
                 key={chat.id}
-                className={`mb-4 ${
-                  chat.type === "user" ? "text-right" : "text-left"
-                }`}
+                className={`mb-4 ${chat.type === "user" ? "text-right" : "text-left"}`}
               >
                 {chat.type === "bot" ? (
                   <div
-                    className={`prose prose-sm ${
-                      isDarkMode ? "prose-invert" : ""
-                    } inline-block p-2 rounded-lg ${
-                      isDarkMode
-                        ? "bg-gray-700 text-white"
-                        : "bg-gray-200 text-gray-900"
-                    }`}
+                    className={`prose prose-sm ${isDarkMode ? "prose-invert" : ""} inline-block p-2 rounded-lg ${isDarkMode ? "bg-gray-700 text-white" : "bg-gray-200 text-gray-900"
+                      }`}
                   >
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                       {chat.message}
@@ -479,11 +471,10 @@ const Workout = () => {
                 ) : (
                   <div className="inline-block">
                     <span
-                      className={`inline-block p-2 rounded-lg ${
-                        isDarkMode
-                          ? "bg-blue-600 text-white"
-                          : "bg-blue-500 text-white"
-                      }`}
+                      className={`inline-block p-2 rounded-lg ${isDarkMode
+                        ? "bg-blue-600 text-white"
+                        : "bg-blue-500 text-white"
+                        }`}
                     >
                       {chat.message}
                     </span>
@@ -494,23 +485,22 @@ const Workout = () => {
                 )}
               </div>
             ))}
+            <div ref={messagesEndRef} />
           </div>
           <form
             onSubmit={handleChatSubmit}
-            className={`flex p-4 border-t ${
-              isDarkMode ? "border-gray-700" : "border-gray-200"
-            }`}
+            className={`flex p-4 border-t ${isDarkMode ? "border-gray-700" : "border-gray-200"
+              }`}
           >
             <input
               type="text"
               value={chatMessage}
               onChange={(e) => setChatMessage(e.target.value)}
               placeholder="Ask me anything about fitness..."
-              className={`flex-grow p-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-600 ${
-                isDarkMode
-                  ? "bg-gray-700 text-white border-gray-600"
-                  : "bg-white text-gray-900 border-gray-300"
-              }`}
+              className={`flex-grow p-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-600 ${isDarkMode
+                ? "bg-gray-700 text-white border-gray-600"
+                : "bg-white text-gray-900 border-gray-300"
+                }`}
             />
             <button
               type="submit"

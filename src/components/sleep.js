@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { IoMdFitness, IoMdNutrition } from "react-icons/io";
 import { FaSignInAlt, FaSignOutAlt, FaBed, FaCommentDots } from "react-icons/fa";
 import { GiAchievement, GiWaterBottle } from "react-icons/gi";
@@ -52,7 +52,6 @@ const SleepTracker = () => {
   const [weight, setWeight] = useState(70);
   const [user, setUser] = useState(null);
   const [errors, setErrors] = useState({});
-  // Added state variables for editing
   const [editEntryId, setEditEntryId] = useState(null);
   const [editSleepDuration, setEditSleepDuration] = useState("");
   const [editSleepQuality, setEditSleepQuality] = useState("");
@@ -60,6 +59,7 @@ const SleepTracker = () => {
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const [chatMessage, setChatMessage] = useState("");
   const [chatHistory, setChatHistory] = useState([]);
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
@@ -140,6 +140,15 @@ const SleepTracker = () => {
 
   const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    if (isChatbotOpen) {
+      scrollToBottom();
+    }
+  }, [isChatbotOpen, chatHistory]);
 
   const toggleChatbot = () => {
     setIsChatbotOpen(!isChatbotOpen);
@@ -367,9 +376,8 @@ const SleepTracker = () => {
 
   return (
     <div
-      className={`min-h-screen ${
-        isDarkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-800"
-      } transition-colors duration-300 flex flex-col`}
+      className={`min-h-screen ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-800"
+        } transition-colors duration-300 flex flex-col`}
     >
       <ToastContainer
         position="top-right"
@@ -383,13 +391,12 @@ const SleepTracker = () => {
         pauseOnHover
       />
       <header
-        className={`py-4 ${
-          isDarkMode ? "bg-gray-800" : "bg-white"
-        } shadow-md sticky top-0 left-0 w-full p-4 z-50`}
+        className={`py-4 ${isDarkMode ? "bg-gray-800" : "bg-white"
+          } shadow-md sticky top-0 left-0 w-full p-4 z-50`}
       >
         <div className="container mx-auto flex justify-between items-center">
           <a href="/" className="text-2xl font-bold flex items-center">
-            <img src="/images/dreamslogo.png" alt="Dreams Logo" className="w-8 h-8 mr-2"/>
+            <img src="/images/dreamslogo.png" alt="Dreams Logo" className="w-8 h-8 mr-2" />
             DREAMS
           </a>
           <nav className="hidden md:block">
@@ -397,41 +404,37 @@ const SleepTracker = () => {
               <li>
                 <Link
                   to="/workout"
-                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
+                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
                 >
-                  <IoMdFitness className="mr-2"/> Workout
+                  <IoMdFitness className="mr-2" /> Workout
                 </Link>
               </li>
               <li>
                 <Link
                   to="/nutrition"
-                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
+                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
                 >
-                  <IoMdNutrition className="mr-2"/> Nutrition
+                  <IoMdNutrition className="mr-2" /> Nutrition
                 </Link>
               </li>
               <li>
                 <Link
                   to="/sleep"
-                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
+                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
                 >
-                  <FaBed className="mr-2"/> Sleep
+                  <FaBed className="mr-2" /> Sleep
                 </Link>
               </li>
               <li>
                 <Link
                   to="/achievement"
-                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
+                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
                 >
-                  <GiAchievement className="mr-2"/> Achievement
+                  <GiAchievement className="mr-2" /> Achievement
                 </Link>
               </li>
             </ul>
@@ -440,15 +443,14 @@ const SleepTracker = () => {
 
             {user ? (
               <>
-                <span className="text-lg font-semibold hidden md:block">{`Hi, ${
-                  user.displayName || user.email
-                }`}</span>
+                <span className="text-lg font-semibold hidden md:block">{`Hi, ${user.displayName || user.email
+                  }`}</span>
                 <button
                   onClick={handleSignOut}
                   className="hidden md:flex items-center space-x-2 bg-red-700 text-white px-4 py-2 rounded-full hover:bg-red-500 transition-colors duration-300"
                   aria-label="Sign out"
                 >
-                  <FaSignOutAlt/>
+                  <FaSignOutAlt />
                   <span>Sign Out</span>
                 </button>
               </>
@@ -458,26 +460,25 @@ const SleepTracker = () => {
                   className="hidden md:flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition-colors duration-300"
                   aria-label="Sign in"
                 >
-                  <FaSignInAlt/>
+                  <FaSignInAlt />
                   <span>Sign In</span>
                 </button>
               </Link>
             )}
             <button
               onClick={toggleDarkMode}
-              className={`p-2 rounded-full ${
-                isDarkMode ? "bg-yellow-400" : "bg-gray-200"
-              }`}
+              className={`p-2 rounded-full ${isDarkMode ? "bg-yellow-400" : "bg-gray-200"
+                }`}
               aria-label="Toggle dark mode"
             >
-              {isDarkMode ? <FiSun className="text-gray-900"/> : <FiMoon/>}
+              {isDarkMode ? <FiSun className="text-gray-900" /> : <FiMoon />}
             </button>
             <button
               onClick={toggleMenu}
               className="md:hidden p-2 rounded-full bg-gray-200"
               aria-label="Toggle menu"
             >
-              <FiMenu/>
+              <FiMenu />
             </button>
           </div>
         </div>
@@ -490,7 +491,7 @@ const SleepTracker = () => {
                     to="/workout"
                     className="py-2 hover:text-blue-500 transition-colors duration-300 flex items-center"
                   >
-                    <IoMdFitness className="mr-2"/> Workout
+                    <IoMdFitness className="mr-2" /> Workout
                   </Link>
                 </li>
                 <li>
@@ -498,7 +499,7 @@ const SleepTracker = () => {
                     to="/nutrition"
                     className="py-2 hover:text-blue-500 transition-colors duration-300 flex items-center"
                   >
-                    <IoMdNutrition className="mr-2"/> Nutrition
+                    <IoMdNutrition className="mr-2" /> Nutrition
                   </Link>
                 </li>
                 <li>
@@ -506,7 +507,7 @@ const SleepTracker = () => {
                     to="/sleep"
                     className="py-2 hover:text-blue-500 transition-colors duration-300 flex items-center"
                   >
-                    <FaBed className="mr-2"/> Sleep
+                    <FaBed className="mr-2" /> Sleep
                   </Link>
                 </li>
                 <li>
@@ -514,16 +515,15 @@ const SleepTracker = () => {
                     to="/achievement"
                     className="py-2 hover:text-blue-500 transition-colors duration-300 flex items-center"
                   >
-                    <GiAchievement className="mr-2"/> Achievement
+                    <GiAchievement className="mr-2" /> Achievement
                   </Link>
                 </li>
               </ul>
             </nav>
             {user ? (
               <>
-                <span className="mt-4 block text-lg font-semibold">{`Hi, ${
-                  user.displayName || user.email
-                }`}</span>
+                <span className="mt-4 block text-lg font-semibold">{`Hi, ${user.displayName || user.email
+                  }`}</span>
                 <button
                   onClick={() => {
                     handleSignOut();
@@ -532,7 +532,7 @@ const SleepTracker = () => {
                   className="mt-4 flex items-center space-x-2 bg-red-600 text-white px-4 py-2 rounded-full hover:bg-red-700 transition-colors duration-300 w-full"
                   aria-label="Sign out"
                 >
-                  <FaSignOutAlt/>
+                  <FaSignOutAlt />
                   <span>Sign Out</span>
                 </button>
               </>
@@ -542,7 +542,7 @@ const SleepTracker = () => {
                   className="mt-4 flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition-colors duration-300 w-full"
                   aria-label="Sign in"
                 >
-                  <FaSignInAlt/>
+                  <FaSignInAlt />
                   <span>Sign In</span>
                 </button>
               </Link>
@@ -561,25 +561,22 @@ const SleepTracker = () => {
 
       {isChatbotOpen && (
         <div
-          className={`fixed bottom-20 right-1 border rounded-lg shadow-lg w-96 max-w-full z-50 ${
-            isDarkMode
-              ? "bg-gray-800 text-white border-gray-700"
-              : "bg-white text-gray-900 border-gray-300"
-          }`}
+          className={`fixed bottom-20 right-1 border rounded-lg shadow-lg w-96 max-w-full z-50 ${isDarkMode
+            ? "bg-gray-800 text-white border-gray-700"
+            : "bg-white text-gray-900 border-gray-300"
+            }`}
         >
           <div
-            className={`flex justify-between items-center p-4 border-b ${
-              isDarkMode ? "border-gray-700" : "border-gray-200"
-            }`}
+            className={`flex justify-between items-center p-4 border-b ${isDarkMode ? "border-gray-700" : "border-gray-200"
+              }`}
           >
             <h3 className="text-lg font-semibold">AI Assistant</h3>
             <button
               onClick={toggleChatbot}
-              className={`focus:outline-none ${
-                isDarkMode
-                  ? "text-gray-400 hover:text-white"
-                  : "text-gray-600 hover:text-gray-800"
-              }`}
+              className={`focus:outline-none ${isDarkMode
+                ? "text-gray-400 hover:text-white"
+                : "text-gray-600 hover:text-gray-800"
+                }`}
               aria-label="Close chatbot"
             >
               &times;
@@ -589,19 +586,12 @@ const SleepTracker = () => {
             {chatHistory.map((chat) => (
               <div
                 key={chat.id}
-                className={`mb-4 ${
-                  chat.type === "user" ? "text-right" : "text-left"
-                }`}
+                className={`mb-4 ${chat.type === "user" ? "text-right" : "text-left"}`}
               >
                 {chat.type === "bot" ? (
                   <div
-                    className={`prose prose-sm ${
-                      isDarkMode ? "prose-invert" : ""
-                    } inline-block p-2 rounded-lg ${
-                      isDarkMode
-                        ? "bg-gray-700 text-white"
-                        : "bg-gray-200 text-gray-900"
-                    }`}
+                    className={`prose prose-sm ${isDarkMode ? "prose-invert" : ""} inline-block p-2 rounded-lg ${isDarkMode ? "bg-gray-700 text-white" : "bg-gray-200 text-gray-900"
+                      }`}
                   >
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                       {chat.message}
@@ -613,11 +603,10 @@ const SleepTracker = () => {
                 ) : (
                   <div className="inline-block">
                     <span
-                      className={`inline-block p-2 rounded-lg ${
-                        isDarkMode
-                          ? "bg-blue-600 text-white"
-                          : "bg-blue-500 text-white"
-                      }`}
+                      className={`inline-block p-2 rounded-lg ${isDarkMode
+                        ? "bg-blue-600 text-white"
+                        : "bg-blue-500 text-white"
+                        }`}
                     >
                       {chat.message}
                     </span>
@@ -628,23 +617,22 @@ const SleepTracker = () => {
                 )}
               </div>
             ))}
+            <div ref={messagesEndRef} />
           </div>
           <form
             onSubmit={handleChatSubmit}
-            className={`flex p-4 border-t ${
-              isDarkMode ? "border-gray-700" : "border-gray-200"
-            }`}
+            className={`flex p-4 border-t ${isDarkMode ? "border-gray-700" : "border-gray-200"
+              }`}
           >
             <input
               type="text"
               value={chatMessage}
               onChange={(e) => setChatMessage(e.target.value)}
               placeholder="Ask me anything about fitness..."
-              className={`flex-grow p-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-600 ${
-                isDarkMode
-                  ? "bg-gray-700 text-white border-gray-600"
-                  : "bg-white text-gray-900 border-gray-300"
-              }`}
+              className={`flex-grow p-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-600 ${isDarkMode
+                ? "bg-gray-700 text-white border-gray-600"
+                : "bg-white text-gray-900 border-gray-300"
+                }`}
             />
             <button
               type="submit"
@@ -660,9 +648,8 @@ const SleepTracker = () => {
       <main className="container mx-auto px-4 py-8 flex-grow">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-6xl mx-auto">
           <section
-            className={`p-6 rounded-lg shadow-lg ${
-              isDarkMode ? "bg-gray-800" : "bg-white"
-            }`}
+            className={`p-6 rounded-lg shadow-lg ${isDarkMode ? "bg-gray-800" : "bg-white"
+              }`}
           >
             <div className="flex items-center space-x-2 mb-4">
               <FaBed className="text-2xl text-blue-500" />
@@ -678,11 +665,10 @@ const SleepTracker = () => {
                   id="sleepDuration"
                   value={sleepDuration}
                   onChange={(e) => setSleepDuration(e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    isDarkMode
-                      ? "bg-gray-700 text-white border-gray-600"
-                      : "bg-white text-gray-900 border-gray-300"
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${isDarkMode
+                    ? "bg-gray-700 text-white border-gray-600"
+                    : "bg-white text-gray-900 border-gray-300"
+                    }`}
                   min="0"
                   step="0.1"
                   required
@@ -701,11 +687,10 @@ const SleepTracker = () => {
                   id="sleepQuality"
                   value={sleepQuality}
                   onChange={(e) => setSleepQuality(e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    isDarkMode
-                      ? "bg-gray-700 text-white border-gray-600"
-                      : "bg-white text-gray-900 border-gray-300"
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${isDarkMode
+                    ? "bg-gray-700 text-white border-gray-600"
+                    : "bg-white text-gray-900 border-gray-300"
+                    }`}
                   required
                 >
                   <option value="">Select quality</option>
@@ -732,9 +717,8 @@ const SleepTracker = () => {
           </section>
 
           <section
-            className={`p-6 rounded-lg shadow-lg ${
-              isDarkMode ? "bg-gray-800" : "bg-white"
-            }`}
+            className={`p-6 rounded-lg shadow-lg ${isDarkMode ? "bg-gray-800" : "bg-white"
+              }`}
           >
             <div className="flex items-center space-x-2 mb-4">
               <IoMdNutrition className="text-2xl text-green-500" />
@@ -747,9 +731,8 @@ const SleepTracker = () => {
         </div>
 
         <section
-          className={`mt-8 p-6 rounded-lg shadow-lg ${
-            isDarkMode ? "bg-gray-800" : "bg-white"
-          }`}
+          className={`mt-8 p-6 rounded-lg shadow-lg ${isDarkMode ? "bg-gray-800" : "bg-white"
+            }`}
         >
           <div className="flex items-center space-x-2 mb-4">
             <FaBed className="text-2xl text-blue-500" />
@@ -768,9 +751,8 @@ const SleepTracker = () => {
 
         {/* Hydration Tip Section */}
         <section
-          className={`mt-8 p-6 rounded-lg shadow-lg ${
-            isDarkMode ? "bg-gray-800" : "bg-white"
-          }`}
+          className={`mt-8 p-6 rounded-lg shadow-lg ${isDarkMode ? "bg-gray-800" : "bg-white"
+            }`}
         >
           <div className="flex items-center space-x-2 mb-4">
             <GiWaterBottle className="text-2xl text-blue-500" />
@@ -786,11 +768,10 @@ const SleepTracker = () => {
                 id="weight"
                 value={weight}
                 onChange={(e) => setWeight(parseFloat(e.target.value))}
-                className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                  isDarkMode
-                    ? "bg-gray-700 text-white border-gray-600"
-                    : "bg-white text-gray-900 border-gray-300"
-                }`}
+                className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${isDarkMode
+                  ? "bg-gray-700 text-white border-gray-600"
+                  : "bg-white text-gray-900 border-gray-300"
+                  }`}
                 required
                 min="0"
                 step="0.1"
@@ -811,9 +792,8 @@ const SleepTracker = () => {
         </section>
 
         <section
-          className={`mt-8 p-6 rounded-lg shadow-lg ${
-            isDarkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"
-          }`}
+          className={`mt-8 p-6 rounded-lg shadow-lg ${isDarkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"
+            }`}
         >
           <h2 className="text-2xl font-semibold mb-4">Sleep History</h2>
           {sleepHistory.length === 0 ? (
@@ -823,9 +803,8 @@ const SleepTracker = () => {
               {sleepHistory.map((entry) => (
                 <li
                   key={entry.id}
-                  className={`p-4 rounded ${
-                    isDarkMode ? "bg-gray-700" : "bg-gray-100"
-                  }`}
+                  className={`p-4 rounded ${isDarkMode ? "bg-gray-700" : "bg-gray-100"
+                    }`}
                 >
                   {editEntryId === entry.id ? (
                     // Edit form
@@ -844,11 +823,10 @@ const SleepTracker = () => {
                           onChange={(e) =>
                             setEditSleepDuration(e.target.value)
                           }
-                          className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                            isDarkMode
-                              ? "bg-gray-600 text-white border-gray-500"
-                              : "bg-white text-gray-900 border-gray-300"
-                          }`}
+                          className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${isDarkMode
+                            ? "bg-gray-600 text-white border-gray-500"
+                            : "bg-white text-gray-900 border-gray-300"
+                            }`}
                           min="0"
                           step="0.1"
                           required
@@ -872,11 +850,10 @@ const SleepTracker = () => {
                           onChange={(e) =>
                             setEditSleepQuality(e.target.value)
                           }
-                          className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                            isDarkMode
-                              ? "bg-gray-600 text-white border-gray-500"
-                              : "bg-white text-gray-900 border-gray-300"
-                          }`}
+                          className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${isDarkMode
+                            ? "bg-gray-600 text-white border-gray-500"
+                            : "bg-white text-gray-900 border-gray-300"
+                            }`}
                           required
                         >
                           <option value="">Select quality</option>

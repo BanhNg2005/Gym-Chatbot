@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   FaInstagram,
@@ -35,6 +35,7 @@ const HomePage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
+  const messagesEndRef = useRef(null);
   const auth = getAuth();
   const [user, setUser] = useState(null);
 
@@ -70,6 +71,16 @@ const HomePage = () => {
     return () => unsubscribeAuth();
   }, [auth]);
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    if (isChatbotOpen) {
+      scrollToBottom();
+    }
+  }, [isChatbotOpen, chatHistory]);
+
   const handleSignOut = () => {
     signOut(auth)
       .then(() => {
@@ -100,7 +111,6 @@ const HomePage = () => {
         timestamp: serverTimestamp(),
       };
 
-      // Save user's message to Firestore
       await addDoc(
         collection(database, `users/${user.uid}/chats`),
         userMessageData
@@ -126,7 +136,6 @@ const HomePage = () => {
         timestamp: serverTimestamp(),
       };
 
-      // Save chatbot's response to Firestore
       await addDoc(
         collection(database, `users/${user.uid}/chats`),
         botMessageData
@@ -152,9 +161,8 @@ const HomePage = () => {
 
   return (
     <div
-      className={`min-h-screen ${
-        isDarkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"
-      } transition-colors duration-300 flex flex-col`}
+      className={`min-h-screen ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"
+        } transition-colors duration-300 flex flex-col`}
     >
       <ToastContainer
         position="top-right"
@@ -180,9 +188,8 @@ const HomePage = () => {
               <li>
                 <Link
                   to="/workout"
-                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
+                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
                 >
                   <IoMdFitness className="mr-2" /> Workout
                 </Link>
@@ -190,9 +197,8 @@ const HomePage = () => {
               <li>
                 <Link
                   to="/nutrition"
-                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
+                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
                 >
                   <IoMdNutrition className="mr-2" /> Nutrition
                 </Link>
@@ -200,9 +206,8 @@ const HomePage = () => {
               <li>
                 <Link
                   to="/sleep"
-                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
+                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
                 >
                   <FaBed className="mr-2" /> Sleep
                 </Link>
@@ -210,9 +215,8 @@ const HomePage = () => {
               <li>
                 <Link
                   to="/achievement"
-                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${
-                    isDarkMode ? "text-white" : "text-gray-900"
-                  }`}
+                  className={`hover:text-blue-500 transition-colors duration-300 flex items-center ${isDarkMode ? "text-white" : "text-gray-900"
+                    }`}
                 >
                   <GiAchievement className="mr-2" /> Achievement
                 </Link>
@@ -361,9 +365,8 @@ const HomePage = () => {
         <section className="mt-36 mb-12">
           <h2 className="text-3xl font-semibold mb-6 text-center">About Us</h2>
           <div
-            className={`${
-              isDarkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"
-            } p-6 rounded-lg shadow-lg max-w-4xl mx-auto`}
+            className={`${isDarkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"
+              } p-6 rounded-lg shadow-lg max-w-4xl mx-auto`}
           >
             <p className="text-lg leading-relaxed">
               Welcome to <strong>DREAMS Fitness</strong>! We are dedicated to helping you achieve your
@@ -377,9 +380,8 @@ const HomePage = () => {
           <h2 className="text-3xl font-semibold mb-6 text-center">Featured Content</h2>
           <div className="flex flex-wrap justify-center gap-8">
             <div
-              className={`${
-                isDarkMode ? "bg-gray-800" : "bg-white"
-              } rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 w-64 h-auto`}
+              className={`${isDarkMode ? "bg-gray-800" : "bg-white"
+                } rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 w-64 h-auto`}
             >
               <img
                 src={require("./templates/home.jpg")}
@@ -389,9 +391,8 @@ const HomePage = () => {
               <div className="p-5">
                 <h3 className="text-xl font-semibold mb-2">Effective Workouts</h3>
                 <p
-                  className={`${
-                    isDarkMode ? "text-gray-400" : "text-gray-600"
-                  } mb-3`}
+                  className={`${isDarkMode ? "text-gray-400" : "text-gray-600"
+                    } mb-3`}
                 >
                   Discover our curated workout plans for all fitness levels, designed to help you achieve
                   your goals efficiently.
@@ -405,9 +406,8 @@ const HomePage = () => {
               </div>
             </div>
             <div
-              className={`${
-                isDarkMode ? "bg-gray-800" : "bg-white"
-              } rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 w-64 h-auto`}
+              className={`${isDarkMode ? "bg-gray-800" : "bg-white"
+                } rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 w-64 h-auto`}
             >
               <img
                 src={require("./templates/nutrition.jpg")}
@@ -417,9 +417,8 @@ const HomePage = () => {
               <div className="p-5">
                 <h3 className="text-xl font-semibold mb-2">Balanced Nutrition</h3>
                 <p
-                  className={`${
-                    isDarkMode ? "text-gray-400" : "text-gray-600"
-                  } mb-3`}
+                  className={`${isDarkMode ? "text-gray-400" : "text-gray-600"
+                    } mb-3`}
                 >
                   Learn about proper nutrition to fuel your fitness journey and optimize your health and
                   performance.
@@ -433,9 +432,8 @@ const HomePage = () => {
               </div>
             </div>
             <div
-              className={`${
-                isDarkMode ? "bg-gray-800" : "bg-white"
-              } rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 w-64 h-auto`}
+              className={`${isDarkMode ? "bg-gray-800" : "bg-white"
+                } rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 w-64 h-auto`}
             >
               <img
                 src={require("./templates/sleep.jpg")}
@@ -445,9 +443,8 @@ const HomePage = () => {
               <div className="p-5">
                 <h3 className="text-xl font-semibold mb-2">Quality Sleep</h3>
                 <p
-                  className={`${
-                    isDarkMode ? "text-gray-400" : "text-gray-600"
-                  } mb-3`}
+                  className={`${isDarkMode ? "text-gray-400" : "text-gray-600"
+                    } mb-3`}
                 >
                   Understand the importance of sleep in your fitness routine and learn techniques for better
                   rest and recovery.
@@ -461,9 +458,8 @@ const HomePage = () => {
               </div>
             </div>
             <div
-              className={`${
-                isDarkMode ? "bg-gray-800" : "bg-white"
-              } rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 w-64 h-auto`}
+              className={`${isDarkMode ? "bg-gray-800" : "bg-white"
+                } rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300 w-64 h-auto`}
             >
               <img
                 src={require("./templates/achievement.jpg")}
@@ -473,9 +469,8 @@ const HomePage = () => {
               <div className="p-5">
                 <h3 className="text-xl font-semibold mb-2">Remarkable Achievements</h3>
                 <p
-                  className={`${
-                    isDarkMode ? "text-gray-400" : "text-gray-600"
-                  } mb-3`}
+                  className={`${isDarkMode ? "text-gray-400" : "text-gray-600"
+                    } mb-3`}
                 >
                   Celebrate your fitness milestones and get inspired by others' success stories.
                 </p>
@@ -492,18 +487,16 @@ const HomePage = () => {
       </main>
 
       <footer
-        className={`${
-          isDarkMode ? "bg-gray-800 text-white" : "bg-gray-200 text-gray-900"
-        } py-10 mt-48`}
+        className={`${isDarkMode ? "bg-gray-800 text-white" : "bg-gray-200 text-gray-900"
+          } py-10 mt-48`}
       >
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-6 md:mb-0">
               <h3 className="text-3xl font-bold mb-2">DREAMS Fitness</h3>
               <p
-                className={`${
-                  isDarkMode ? "text-gray-400" : "text-gray-600"
-                }`}
+                className={`${isDarkMode ? "text-gray-400" : "text-gray-600"
+                  }`}
               >
                 Dreams don't work unless you do
               </p>
@@ -551,25 +544,22 @@ const HomePage = () => {
 
       {isChatbotOpen && (
         <div
-          className={`fixed bottom-20 right-1 border rounded-lg shadow-lg w-96 max-w-full z-50 ${
-            isDarkMode
-              ? "bg-gray-800 text-white border-gray-700"
-              : "bg-white text-gray-900 border-gray-300"
-          }`}
+          className={`fixed bottom-20 right-1 border rounded-lg shadow-lg w-96 max-w-full z-50 ${isDarkMode
+            ? "bg-gray-800 text-white border-gray-700"
+            : "bg-white text-gray-900 border-gray-300"
+            }`}
         >
           <div
-            className={`flex justify-between items-center p-4 border-b ${
-              isDarkMode ? "border-gray-700" : "border-gray-200"
-            }`}
+            className={`flex justify-between items-center p-4 border-b ${isDarkMode ? "border-gray-700" : "border-gray-200"
+              }`}
           >
             <h3 className="text-lg font-semibold">AI Assistant</h3>
             <button
               onClick={toggleChatbot}
-              className={`focus:outline-none ${
-                isDarkMode
-                  ? "text-gray-400 hover:text-white"
-                  : "text-gray-600 hover:text-gray-800"
-              }`}
+              className={`focus:outline-none ${isDarkMode
+                ? "text-gray-400 hover:text-white"
+                : "text-gray-600 hover:text-gray-800"
+                }`}
             >
               &times;
             </button>
@@ -578,19 +568,12 @@ const HomePage = () => {
             {chatHistory.map((chat) => (
               <div
                 key={chat.id}
-                className={`mb-4 ${
-                  chat.type === "user" ? "text-right" : "text-left"
-                }`}
+                className={`mb-4 ${chat.type === "user" ? "text-right" : "text-left"}`}
               >
                 {chat.type === "bot" ? (
                   <div
-                    className={`prose prose-sm ${
-                      isDarkMode ? "prose-invert" : ""
-                    } inline-block p-2 rounded-lg ${
-                      isDarkMode
-                        ? "bg-gray-700 text-white"
-                        : "bg-gray-200 text-gray-900"
-                    }`}
+                    className={`prose prose-sm ${isDarkMode ? "prose-invert" : ""} inline-block p-2 rounded-lg ${isDarkMode ? "bg-gray-700 text-white" : "bg-gray-200 text-gray-900"
+                      }`}
                   >
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                       {chat.message}
@@ -601,7 +584,12 @@ const HomePage = () => {
                   </div>
                 ) : (
                   <div className="inline-block">
-                    <span className="inline-block p-2 rounded-lg bg-blue-600 text-white">
+                    <span
+                      className={`inline-block p-2 rounded-lg ${isDarkMode
+                          ? "bg-blue-600 text-white"
+                          : "bg-blue-500 text-white"
+                        }`}
+                    >
                       {chat.message}
                     </span>
                     <div className="text-xs text-gray-500 mt-1">
@@ -611,23 +599,22 @@ const HomePage = () => {
                 )}
               </div>
             ))}
+            <div ref={messagesEndRef} />
           </div>
           <form
             onSubmit={handleChatSubmit}
-            className={`flex p-4 border-t ${
-              isDarkMode ? "border-gray-700" : "border-gray-200"
-            }`}
+            className={`flex p-4 border-t ${isDarkMode ? "border-gray-700" : "border-gray-200"
+              }`}
           >
             <input
               type="text"
               value={chatMessage}
               onChange={(e) => setChatMessage(e.target.value)}
               placeholder="Ask me anything about fitness..."
-              className={`flex-grow p-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-600 ${
-                isDarkMode
-                  ? "bg-gray-700 text-white border-gray-600"
-                  : "bg-white text-gray-900 border-gray-300"
-              }`}
+              className={`flex-grow p-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-600 ${isDarkMode
+                ? "bg-gray-700 text-white border-gray-600"
+                : "bg-white text-gray-900 border-gray-300"
+                }`}
             />
             <button
               type="submit"
