@@ -7,9 +7,8 @@ import {
   signInWithPopup,
   RecaptchaVerifier,
   signInWithPhoneNumber,
-  sendPasswordResetEmail
 } from "firebase/auth";
-import { auth, googleProvider, facebookProvider, githubProvider } from './firebase';
+import { auth, googleProvider, facebookProvider, githubProvider, sendPasswordResetEmail } from './firebase';
 
 const LoginForm = () => {
   const [signInMethod, setSignInMethod] = useState("email");
@@ -48,9 +47,8 @@ const LoginForm = () => {
       try {
         await signInWithEmailAndPassword(auth, emailOrPhoneInput, passwordInput);
         if (remember) {
+          // Have to change this in the future to use a more secure method
           localStorage.setItem('emailOrPhone', emailOrPhoneInput);
-          // Warning: Storing passwords in localStorage is not secure.
-          // Consider using more secure methods like sessionStorage or secure HTTP-only cookies.
           localStorage.setItem('password', passwordInput);
         }
         setIsSubmitted(true);
@@ -62,7 +60,6 @@ const LoginForm = () => {
         const appVerifier = new RecaptchaVerifier('recaptcha-container', {
           'size': 'invisible',
           'callback': (response) => {
-            // reCAPTCHA solved, allow signInWithPhoneNumber.
           }
         }, auth);
         const confirmationResult = await signInWithPhoneNumber(auth, emailOrPhoneInput, appVerifier);
@@ -71,7 +68,7 @@ const LoginForm = () => {
           await confirmationResult.confirm(code);
           if (remember) {
             localStorage.setItem('emailOrPhone', emailOrPhoneInput);
-            localStorage.setItem('password', passwordInput); // Although password may not be applicable for phone auth
+            localStorage.setItem('password', passwordInput);
           }
           setIsSubmitted(true);
         } else {
@@ -94,13 +91,20 @@ const LoginForm = () => {
       return;
     }
 
+
+    const actionCodeSettings = {
+      url: window.location.origin + "/resetpass",
+      handleCodeInApp: true,
+    };
+
     try {
-      await sendPasswordResetEmail(auth, resetEmail);
-      setResetEmailSuccess("If an account exists with that email, a password reset link has been sent.");
+      await sendPasswordResetEmail(auth, resetEmail, actionCodeSettings);
+      setResetEmailSuccess("Password reset email sent. Please check your inbox.");
     } catch (error) {
-      console.error("Error sending password reset email:", error);
       if (error.code === 'auth/invalid-email') {
         setResetEmailError("Please enter a valid email address.");
+      } else if (error.code === 'auth/user-not-found') {
+        setResetEmailError("No user found with this email.");
       } else {
         setResetEmailError("Error sending reset email. Please try again.");
       }
