@@ -43,7 +43,6 @@ const HomePage = () => {
       setUser(currentUser);
 
       if (currentUser) {
-        // Set up Firestore listener for chat messages
         const chatRef = collection(database, `users/${currentUser.uid}/chats`);
         const q = query(chatRef, orderBy("timestamp", "asc"));
 
@@ -64,7 +63,6 @@ const HomePage = () => {
           unsubscribeChats();
         };
       } else {
-        // Clear chat history when user signs out
         setChatHistory([]);
       }
     });
@@ -78,7 +76,6 @@ const HomePage = () => {
         toast.success("Signed out successfully!");
       })
       .catch((error) => {
-        console.error("Error signing out:", error);
         toast.error("Error signing out: " + error.message);
       });
   };
@@ -109,7 +106,6 @@ const HomePage = () => {
         userMessageData
       );
 
-      // Send user's message to the chatbot server
       const response = await fetch("http://localhost:5000/chat", {
         method: "POST",
         headers: {
@@ -138,7 +134,6 @@ const HomePage = () => {
 
       setChatMessage("");
     } catch (error) {
-      console.error("Error submitting chat:", error);
       toast.error("Error submitting chat: " + error.message);
     }
   };
@@ -159,7 +154,7 @@ const HomePage = () => {
     <div
       className={`min-h-screen ${
         isDarkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"
-      }`}
+      } transition-colors duration-300 flex flex-col`}
     >
       <ToastContainer
         position="top-right"
@@ -363,7 +358,6 @@ const HomePage = () => {
           </div>
         </section>
 
-        {/* About Us Section */}
         <section className="mt-36 mb-12">
           <h2 className="text-3xl font-semibold mb-6 text-center">About Us</h2>
           <div
@@ -379,7 +373,6 @@ const HomePage = () => {
           </div>
         </section>
 
-        {/* Featured Content Section */}
         <section id="featured-content" className="mt-24 ">
           <h2 className="text-3xl font-semibold mb-6 text-center">Featured Content</h2>
           <div className="flex flex-wrap justify-center gap-8">
