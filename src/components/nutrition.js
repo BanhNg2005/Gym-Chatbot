@@ -36,13 +36,11 @@ const Nutrition = () => {
 
   useEffect(() => {
     if (user) {
-      // Reference to the user's nutrition collection
       const nutritionCollection = collection(database, `users/${user.uid}/nutrition`);
-
-      // Create a query to order meals by timestamp (latest first)
+      // a query to get the meals sorted by timestamp in descending order
       const mealsQuery = query(nutritionCollection, orderBy("timestamp", "desc"));
 
-      // Set up a real-time listener
+      // set up a real time listener for meals
       const unsubscribe = onSnapshot(
         mealsQuery,
         (snapshot) => {
@@ -58,15 +56,12 @@ const Nutrition = () => {
           setMealsHistory(meals);
         },
         (error) => {
-          console.error("Error fetching meals:", error);
           toast.error("Error fetching meals: " + error.message);
         }
       );
-
-      // Cleanup the listener on unmount or when user changes
       return () => unsubscribe();
     } else {
-      // If no user is authenticated, clear the meals history
+      // if no user is authenticated, clear the meals history
       setMealsHistory([]);
     }
   }, [user]);
@@ -76,7 +71,6 @@ const Nutrition = () => {
       setUser(currentUser);
 
       if (currentUser) {
-        // Set up Firestore listener for chat messages
         const chatRef = collection(database, `users/${currentUser.uid}/chats`);
         const q = query(chatRef, orderBy("timestamp", "asc"));
 
@@ -97,25 +91,21 @@ const Nutrition = () => {
           unsubscribeChats();
         };
       } else {
-        // Clear chat history when user signs out
         setChatHistory([]);
       }
     });
 
     return () => {
-      // Clean up authentication listener
       if (unsubscribeAuth) {
         unsubscribeAuth();
       }
     };
   }, []);
 
-  // Handler to toggle chatbot
   const toggleChatbot = () => {
     setIsChatbotOpen(!isChatbotOpen);
   };
 
-  // Handler for chat message submission
   const handleChatSubmit = async (e) => {
     e.preventDefault();
 
@@ -136,13 +126,11 @@ const Nutrition = () => {
         timestamp: serverTimestamp(),
       };
 
-      // Save user's message to Firestore
       await addDoc(
         collection(database, `users/${user.uid}/chats`),
         userMessageData
       );
 
-      // Send user's message to the chatbot server
       const response = await fetch("http://localhost:5000/chat", {
         method: "POST",
         headers: {
@@ -163,7 +151,6 @@ const Nutrition = () => {
         timestamp: serverTimestamp(),
       };
 
-      // Save chatbot's response to Firestore
       await addDoc(
         collection(database, `users/${user.uid}/chats`),
         botMessageData
@@ -171,7 +158,6 @@ const Nutrition = () => {
 
       setChatMessage("");
     } catch (error) {
-      console.error("Error submitting chat:", error);
       toast.error("Error submitting chat: " + error.message);
     }
   };
@@ -190,38 +176,31 @@ const Nutrition = () => {
         toast.success("Signed out successfully!");
       })
       .catch((error) => {
-        console.error("Error signing out:", error);
         toast.error("Error signing out: " + error.message);
       });
   };
 
-  // Enhanced handleSubmit function with improved validation
   const handleSubmit = (e) => {
     e.preventDefault();
     const newErrors = {};
 
-    // Validate Meal/Snack
     if (!meal.trim()) {
       newErrors.meal = "Meal/Snack information is required";
     }
 
-    // Validate Calories
     if (!calories) {
       newErrors.calories = "Calories information is required";
     } else if (isNaN(calories) || parseInt(calories, 10) <= 0) {
       newErrors.calories = "Calories must be a positive number";
     }
 
-    // If there are validation errors, update the state and exit
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
-
-    // Proceed to add meal
     handleAddMeal();
 
-    // Reset form fields and errors
+    // reset form fields and errors
     setMeal("");
     setCalories("");
     setErrors({});
@@ -239,7 +218,6 @@ const Nutrition = () => {
       await deleteDoc(mealDocRef);
       toast.success("Meal deleted successfully!");
     } catch (error) {
-      console.error("Error deleting meal:", error);
       toast.error(`Error deleting meal: ${error.message}`);
     }
   };
@@ -259,27 +237,18 @@ const Nutrition = () => {
       const mealData = {
         meal: meal.trim(),
         calories: parsedCalories,
-        timestamp: serverTimestamp(), // Use Firestore server timestamp
+        timestamp: serverTimestamp(),
       };
 
-      // Log the data being sent
-      console.log("Submitting Meal Data:", mealData);
-
-      // Reference to the user's nutrition collection
       const nutritionCollection = collection(database, `users/${user.uid}/nutrition`);
+      const docRef = await addDoc(nutritionCollection, mealData); 
 
-      // Add the meal to Firestore
-      const docRef = await addDoc(nutritionCollection, mealData);
-
-      console.log("Meal saved with ID:", docRef.id);
       toast.success("Meal logged successfully!");
 
-      // Reset form fields and errors
       setMeal("");
       setCalories("");
       setErrors({});
     } catch (error) {
-      console.error("Error adding meal:", error);
       toast.error(`Error adding meal: ${error.message}`);
     }
   };
@@ -309,7 +278,9 @@ const Nutrition = () => {
   ];
 
   return (
-    <div className={`min-h-screen ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"}`}>
+    <div className={`min-h-screen ${
+      isDarkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"
+    } transition-colors duration-300 flex flex-col`}>
       <ToastContainer
         position="top-right"
         autoClose={5000}
@@ -598,7 +569,6 @@ const Nutrition = () => {
 
       <div className="container mx-auto py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
-          {/* Nutritional Tips */}
           <div
             className={`${isDarkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"
               } p-6 rounded-lg shadow-md`}
@@ -627,7 +597,6 @@ const Nutrition = () => {
             </ul>
           </div>
 
-          {/* Log Your Meal */}
           <div
             className={`${isDarkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"
               } p-6 rounded-lg shadow-md`}
@@ -711,7 +680,6 @@ const Nutrition = () => {
           </div>
         </div>
 
-        {/* Meal Plans */}
         <div className="mt-8">
           <div
             className={`${isDarkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"

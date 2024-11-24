@@ -61,25 +61,21 @@ const Workout = () => {
           unsubscribeChats();
         };
       } else {
-        // Clear chat history when user signs out
         setChatHistory([]);
       }
     });
 
     return () => {
-      // Clean up authentication listener
       if (unsubscribeAuth) {
         unsubscribeAuth();
       }
     };
   }, []);
 
-  // Handler to toggle chatbot
   const toggleChatbot = () => {
     setIsChatbotOpen(!isChatbotOpen);
   };
 
-  // Handler for chat message submission
   const handleChatSubmit = async (e) => {
     e.preventDefault();
 
@@ -100,13 +96,11 @@ const Workout = () => {
         timestamp: serverTimestamp(),
       };
 
-      // Save user's message to Firestore
       await addDoc(
         collection(database, `users/${user.uid}/chats`),
         userMessageData
       );
 
-      // Send user's message to the chatbot server
       const response = await fetch("http://localhost:5000/chat", {
         method: "POST",
         headers: {
@@ -127,7 +121,6 @@ const Workout = () => {
         timestamp: serverTimestamp(),
       };
 
-      // Save chatbot's response to Firestore
       await addDoc(
         collection(database, `users/${user.uid}/chats`),
         botMessageData
@@ -135,7 +128,6 @@ const Workout = () => {
 
       setChatMessage("");
     } catch (error) {
-      console.error("Error submitting chat:", error);
       toast.error("Error submitting chat: " + error.message);
     }
   };
@@ -146,23 +138,30 @@ const Workout = () => {
         toast.success("Signed out successfully!");
       })
       .catch((error) => {
-        console.error("Error signing out:", error);
         toast.error("Error signing out: " + error.message);
       });
   };
 
-  // Handler functions
   const handleCreateWorkout = async (plan) => {
     setWorkoutPlan(plan);
     try {
       if (!user) {
         throw new Error("User is not authenticated! Please sign in to save your workout plan.");
       }
-      const docRef = await addDoc(collection(database, `users/${user.uid}/workoutPlans`), plan);
-      console.log("Workout plan saved with ID: ", docRef.id);
+  
+      const workoutData = {
+        workoutType: plan.workoutType,
+        duration: parseInt(plan.duration, 10), 
+        muscleGroups: plan.muscleGroups.map((mg) => ({
+          label: mg.label,
+          value: mg.value,
+        })),
+        timestamp: serverTimestamp(),
+      };
+  
+      const docRef = await addDoc(collection(database, `users/${user.uid}/workoutPlans`), workoutData);
       toast.success("Workout plan saved successfully!");
     } catch (error) {
-      console.error("Error saving workout plan: ", error);
       toast.error('Error creating workout plan: ' + error.message);
     }
   };
@@ -173,10 +172,8 @@ const Workout = () => {
         throw new Error("User is not authenticated! Please sign in to adjust your workout.");
       }
       const docRef = await addDoc(collection(database, `users/${user.uid}/workoutAdjustments`), feedback);
-      console.log("Workout adjustment saved with ID: ", docRef.id);
       toast.success('Workout adjusted successfully!');
     } catch (error) {
-      console.error("Error saving workout adjustment: ", error);
       toast.error('Error adjusting workout: ' + error.message);
     }
   };
@@ -187,10 +184,8 @@ const Workout = () => {
         throw new Error("User is not authenticated! Please sign in to set your rest days.");
       }
       const docRef = await addDoc(collection(database, `users/${user.uid}/restDays`), { days });
-      console.log("Rest days saved with ID: ", docRef.id);
       toast.success('Rest days set successfully!');
     } catch (error) {
-      console.error("Error saving rest days: ", error);
       toast.error('Error setting rest days: ' + error.message);
     }
   };
@@ -209,12 +204,10 @@ const Workout = () => {
         collection(database, `users/${user.uid}/exerciseVariations`),
         data
       );
-      console.log("Exercise variation saved with ID: ", docRef.id);
       toast.success(
         `Selected variation "${variationName}" for "${exerciseName}".`
       );
     } catch (error) {
-      console.error("Error saving exercise variation: ", error);
       toast.error("Error selecting exercise variation: " + error.message);
     }
   };
@@ -228,7 +221,9 @@ const Workout = () => {
   };
 
   return (
-    <div className={`min-h-screen ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"}`}>
+    <div className={`min-h-screen ${
+      isDarkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"
+    } transition-colors duration-300 flex flex-col`}>
       <ToastContainer
         position="top-right"
         autoClose={5000}
@@ -568,7 +563,16 @@ const CreateWorkoutPlan = ({ onCreateWorkout, isDarkMode }) => {
       return;
     }
 
-    onCreateWorkout({ workoutType, duration, muscleGroups });
+    const workoutData = {
+      workoutType,
+      duration: parseInt(duration, 10),
+      muscleGroups: muscleGroups.map((mg) => ({
+        label: mg.label,
+        value: mg.value,
+      })),
+    };
+
+    onCreateWorkout(workoutData);
     setWorkoutType("");
     setDuration("");
     setMuscleGroups([]);
@@ -588,12 +592,13 @@ const CreateWorkoutPlan = ({ onCreateWorkout, isDarkMode }) => {
             className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${errors.workoutType ? "border-red-500" : ""} ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-black'}`}
             value={workoutType}
             onChange={(e) => setWorkoutType(e.target.value)}
+            required
           >
             <option value="">Select Workout Type</option>
-            <option value="strength">Strength Training</option>
-            <option value="cardio">Cardio</option>
-            <option value="flexibility">Flexibility</option>
-            <option value="balance">Balance</option>
+            <option value="Strength Training">Strength Training</option>
+            <option value="Cardio">Cardio</option>
+            <option value="Flexibility">Flexibility</option>
+            <option value="Balance">Balance</option>
           </select>
           {errors.workoutType && <p className="text-red-500 text-xs italic">{errors.workoutType}</p>}
         </div>
@@ -607,6 +612,8 @@ const CreateWorkoutPlan = ({ onCreateWorkout, isDarkMode }) => {
             className={`shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline ${errors.duration ? "border-red-500" : ""} ${isDarkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-black'}`}
             value={duration}
             onChange={(e) => setDuration(e.target.value)}
+            required
+            min="1"
           />
           {errors.duration && <p className="text-red-500 text-xs italic">{errors.duration}</p>}
         </div>
@@ -668,7 +675,6 @@ const AdjustWorkout = ({ onAdjustWorkout, isDarkMode }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     onAdjustWorkout({ difficulty, feedback });
-    // Reset form
     setDifficulty(3);
     setFeedback("");
   };

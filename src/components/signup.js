@@ -75,14 +75,11 @@ const SignUpForm = () => {
     });
 
     if (Object.keys(newErrors).length === 0 && Object.values(errors).every(error => error === "")) {
-      // Sign up with Firebase
       createUserWithEmailAndPassword(auth, formData.email, formData.password)
         .then((userCredential) => {
-          console.log("Form submitted", userCredential.user);
           setIsSubmitted(true);
         })
         .catch((error) => {
-          console.error("Error signing up:", error.message);
           setErrors((prevErrors) => ({ ...prevErrors, email: error.message }));
         });
     } else {
@@ -90,27 +87,14 @@ const SignUpForm = () => {
     }
   };
 
-  // const googleProvider = new GoogleAuthProvider();
-  // const googleBtn = () => {
-  //   signInWithPopup(auth, googleProvider)
-  //   .then ((result) => {
-  //     const userInfo = result.user;
-  //     console.log(userInfo);
-  //   })
-  //   .catch(err => console.log(err));
-  // }
-
   const handleThirdPartySignUp = (provider) => {
     signInWithPopup(auth, provider)
       .then((result) => {
-        console.log(`Signed up with ${provider.providerId}`, result.user);
         setIsSubmitted(true);
       })
       .catch((error) => {
         if (error.code === 'auth/popup-closed-by-user') {
-          console.error('Popup closed by user');
         } else {
-          console.error(`Error signing up with ${provider.providerId}:`, error.message);
           setErrors((prevErrors) => ({ ...prevErrors, email: error.message }));
         }
       });

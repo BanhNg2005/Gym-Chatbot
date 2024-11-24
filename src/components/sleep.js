@@ -92,7 +92,6 @@ const SleepTracker = () => {
           setSleepHistory(sleepEntries);
         },
         (error) => {
-          console.error("Error fetching sleep data:", error);
           toast.error("Error fetching sleep data: " + error.message);
         }
       );
@@ -108,7 +107,6 @@ const SleepTracker = () => {
       setUser(currentUser);
 
       if (currentUser) {
-        // Set up Firestore listener for chat messages
         const chatRef = collection(database, `users/${currentUser.uid}/chats`);
         const q = query(chatRef, orderBy("timestamp", "asc"));
 
@@ -129,13 +127,11 @@ const SleepTracker = () => {
           unsubscribeChats();
         };
       } else {
-        // Clear chat history when user signs out
         setChatHistory([]);
       }
     });
 
     return () => {
-      // Clean up authentication listener
       if (unsubscribeAuth) {
         unsubscribeAuth();
       }
@@ -145,12 +141,10 @@ const SleepTracker = () => {
   const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
-  // Handler to toggle chatbot
   const toggleChatbot = () => {
     setIsChatbotOpen(!isChatbotOpen);
   };
 
-  // Handler for chat message submission
   const handleChatSubmit = async (e) => {
     e.preventDefault();
 
@@ -171,13 +165,11 @@ const SleepTracker = () => {
         timestamp: serverTimestamp(),
       };
 
-      // Save user's message to Firestore
       await addDoc(
         collection(database, `users/${user.uid}/chats`),
         userMessageData
       );
 
-      // Send user's message to the chatbot server
       const response = await fetch("http://localhost:5000/chat", {
         method: "POST",
         headers: {
@@ -198,7 +190,6 @@ const SleepTracker = () => {
         timestamp: serverTimestamp(),
       };
 
-      // Save chatbot's response to Firestore
       await addDoc(
         collection(database, `users/${user.uid}/chats`),
         botMessageData
@@ -206,7 +197,6 @@ const SleepTracker = () => {
 
       setChatMessage("");
     } catch (error) {
-      console.error("Error submitting chat:", error);
       toast.error("Error submitting chat: " + error.message);
     }
   };
@@ -217,7 +207,6 @@ const SleepTracker = () => {
         toast.success("Signed out successfully!");
       })
       .catch((error) => {
-        console.error("Error signing out:", error);
         toast.error("Error signing out: " + error.message);
       });
   };
@@ -262,12 +251,10 @@ const SleepTracker = () => {
       setSleepQuality("");
       setErrors({});
     } catch (error) {
-      console.error("Error adding sleep data:", error);
       toast.error(`Error adding sleep data: ${error.message}`);
     }
   };
 
-  // Function to delete a sleep entry
   const handleDelete = async (id) => {
     if (!user) {
       toast.error("Please sign in to delete your sleep data.");
@@ -279,19 +266,16 @@ const SleepTracker = () => {
       await deleteDoc(sleepDocRef);
       toast.success("Sleep data deleted successfully!");
     } catch (error) {
-      console.error("Error deleting sleep data:", error);
       toast.error(`Error deleting sleep data: ${error.message}`);
     }
   };
 
-  // Function to initiate editing a sleep entry
   const handleEditInitiate = (entry) => {
     setEditEntryId(entry.id);
     setEditSleepDuration(entry.duration.toString());
     setEditSleepQuality(entry.quality);
   };
 
-  // Function to update a sleep entry
   const handleUpdate = async (e) => {
     e.preventDefault();
 
@@ -331,7 +315,6 @@ const SleepTracker = () => {
       setEditSleepQuality("");
       setErrors({});
     } catch (error) {
-      console.error("Error updating sleep data:", error);
       toast.error(`Error updating sleep data: ${error.message}`);
     }
   };
@@ -675,7 +658,6 @@ const SleepTracker = () => {
       )}
 
       <main className="container mx-auto px-4 py-8 flex-grow">
-        {/* Sleep Tracking Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-6xl mx-auto">
           <section
             className={`p-6 rounded-lg shadow-lg ${
@@ -764,7 +746,6 @@ const SleepTracker = () => {
           </section>
         </div>
 
-        {/* Sleep Insights Section */}
         <section
           className={`mt-8 p-6 rounded-lg shadow-lg ${
             isDarkMode ? "bg-gray-800" : "bg-white"
@@ -829,7 +810,6 @@ const SleepTracker = () => {
           </div>
         </section>
 
-        {/* Sleep History Section */}
         <section
           className={`mt-8 p-6 rounded-lg shadow-lg ${
             isDarkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"
@@ -929,7 +909,6 @@ const SleepTracker = () => {
                       </div>
                     </form>
                   ) : (
-                    // Display entry
                     <div>
                       <p>Date: {entry.timestamp.toLocaleDateString()}</p>
                       <p>Duration: {entry.duration} hours</p>
