@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { motion } from "framer-motion";
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { auth } from './firebase';
 import { confirmPasswordReset } from "firebase/auth";
 
@@ -12,18 +12,39 @@ const ResetPasswordForm = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isValidCode, setIsValidCode] = useState(true);
+
+  const location = useLocation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage("");
+
+    const isStrongPassword = (password) => {
+      const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+      return passwordPattern.test(password);
+    };
 
     if (newPassword !== confirmPassword) {
       setErrorMessage("Passwords do not match. Please try again.");
       return;
     }
 
+    if (!isStrongPassword(newPassword)) {
+      setErrorMessage("Password must be at least 8 characters long and include both letters and numbers.");
+      return;
+    }
+
     try {
-      const oobCode = new URLSearchParams(window.location.search).get('oobCode');
+      const params = new URLSearchParams(location.search);
+      const oobCode = params.get('oobCode');
+
+      if (!oobCode) {
+        setErrorMessage("Invalid or missing reset code.");
+        setIsValidCode(false);
+        return;
+      }
+
       await confirmPasswordReset(auth, oobCode, newPassword);
       setIsSubmitted(true);
     } catch (error) {
@@ -41,6 +62,34 @@ const ResetPasswordForm = () => {
 
   if (isSubmitted) {
     return <Navigate to="/login" />;
+  }
+
+  if (!isValidCode) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-100 to-blue-200 flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md"
+        >
+          <h1 className="text-3xl font-bold text-center mb-6 text-red-600">
+            Invalid Reset Link
+          </h1>
+          <p className="text-center text-gray-700">
+            The password reset link is invalid or has expired. Please request a new password reset.
+          </p>
+          <div className="mt-6 text-center">
+            <a
+              href="/login"
+              className="text-sky-600 hover:underline"
+            >
+              Back to Login
+            </a>
+          </div>
+        </motion.div>
+      </div>
+    );
   }
 
   return (
