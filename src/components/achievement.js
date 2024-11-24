@@ -34,12 +34,31 @@ const AchievementComponent = () => {
     const unsubscribeWorkoutPlansRef = useRef(null);
     const unsubscribeExerciseVariationsRef = useRef(null);
     const [currentBadgeIndex, setCurrentBadgeIndex] = useState(0);
+    const [isTransitioning, setIsTransitioning] = useState(false);
+    const allMuscleGroups = ["Chest", "Back", "Legs", "Arms", "Shoulders", "Core"];
+    const allExerciseVariations = ["Planks", "Squats", "Push-ups", "Lunges"];
 
     const achievements = [
         { name: "First Workout", icon: <FaDumbbell />, unlocked: workoutPlans.length >= 1 },
         { name: "Five Workouts", icon: <FaTrophy />, unlocked: workoutPlans.length >= 5 },
-        { name: "First Variation Selected", icon: <FaAppleAlt />, unlocked: exerciseVariations.length >= 1 },
+        { name: "First Variation Selected", icon: <FaDumbbell />, unlocked: exerciseVariations.length >= 1 },
         { name: "Ten Workouts", icon: <FaTrophy />, unlocked: workoutPlans.length >= 10 },
+        {
+            name: "All Muscle Groups",
+            icon: <FaTrophy />,
+            unlocked: allMuscleGroups.every(muscle =>
+                workoutPlans.some(plan =>
+                    plan.muscleGroups.some(mg => mg.label === muscle)
+                )
+            ),
+        },
+        {
+            name: "Complete All Variations",
+            icon: <FaTrophy />,
+            unlocked: allExerciseVariations.every(variation =>
+                exerciseVariations.some(ev => ev.variation === variation)
+            ),
+        },
     ];
 
     useEffect(() => {
@@ -50,11 +69,8 @@ const AchievementComponent = () => {
                 fetchWorkoutPlans(currentUser.uid);
                 fetchExerciseVariations(currentUser.uid);
             } else {
-                // Clear workout plans and exercise variations if user is signed out
                 setWorkoutPlans([]);
                 setExerciseVariations([]);
-
-                // Unsubscribe from Firestore listeners
                 if (unsubscribeWorkoutPlansRef.current) {
                     unsubscribeWorkoutPlansRef.current();
                     unsubscribeWorkoutPlansRef.current = null;
@@ -136,13 +152,23 @@ const AchievementComponent = () => {
     };
 
     const nextBadges = () => {
-        setCurrentBadgeIndex((prevIndex) =>
-            prevIndex + 3 < achievements.length ? prevIndex + 3 : prevIndex
-        );
+        if (currentBadgeIndex + 3 < achievements.length && !isTransitioning) {
+            setIsTransitioning(true);
+            setTimeout(() => {
+                setCurrentBadgeIndex(currentBadgeIndex + 3);
+                setIsTransitioning(false);
+            }, 500);
+        }
     };
 
     const previousBadges = () => {
-        setCurrentBadgeIndex((prevIndex) => (prevIndex - 3 >= 0 ? prevIndex - 3 : 0));
+        if (currentBadgeIndex - 3 >= 0 && !isTransitioning) {
+            setIsTransitioning(true);
+            setTimeout(() => {
+                setCurrentBadgeIndex(currentBadgeIndex - 3);
+                setIsTransitioning(false);
+            }, 500);
+        }
     };
 
     const toggleDarkMode = () => {
@@ -332,25 +358,25 @@ const AchievementComponent = () => {
 
             <main className="container mx-auto mt-8 p-4">
                 <section className="mb-12" aria-labelledby="achievements-title">
-                    <h2 id="achievements-title" className="text-3xl font-bold mb-6">
+                    <h2 id="achievements-title" className="text-3xl font-bold mb-6 text-center">
                         Achievements
                     </h2>
                     <div className="flex items-center">
                         <button
                             onClick={previousBadges}
                             disabled={currentBadgeIndex === 0}
-                            className="p-2"
+                            className={`p-2 transition-opacity duration-300 ${currentBadgeIndex === 0 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200"}`}
                         >
                             <FaChevronLeft size={24} />
                         </button>
-                        <div className="flex-grow grid grid-cols-3 gap-4 mx-4">
+                        <div className={`flex-grow grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mx-4 transition-opacity duration-500 ${isTransitioning ? "opacity-0" : "opacity-100"}`}>
                             {achievements
                                 .slice(currentBadgeIndex, currentBadgeIndex + 3)
                                 .map((achievement, index) => (
                                     <div
                                         key={index}
-                                        className={`p-4 rounded-lg shadow-md flex flex-col items-center ${achievement.unlocked ? "bg-green-500" : "bg-gray-300"
-                                            }`}
+                                        className={`p-4 rounded-lg shadow-md flex flex-col items-center transition-transform duration-300 transform hover:scale-105 ${achievement.unlocked ? "bg-green-500" : "bg-gray-300"
+                                            } h-40 sm:h-48 md:h-56`}
                                     >
                                         <div className="text-4xl mb-2">{achievement.icon}</div>
                                         <span className="text-lg font-semibold">
@@ -367,7 +393,7 @@ const AchievementComponent = () => {
                         <button
                             onClick={nextBadges}
                             disabled={currentBadgeIndex + 3 >= achievements.length}
-                            className="p-2"
+                            className={`p-2 transition-opacity duration-300 ${currentBadgeIndex + 3 >= achievements.length ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-200"}`}
                         >
                             <FaChevronRight size={24} />
                         </button>
@@ -427,10 +453,10 @@ const AchievementComponent = () => {
                                         }`}
                                 >
                                     <p>
-                                        <strong>Exercise:</strong> {variation.exercise}
+                                        <strong>Variation:</strong> {variation.exercise}
                                     </p>
                                     <p>
-                                        <strong>Variation:</strong> {variation.variation}
+                                        <strong>Exercise:</strong> {variation.variation}
                                     </p>
                                     <p>
                                         <strong>Selected At:</strong> {variation.timestamp.toLocaleString()}
@@ -478,6 +504,7 @@ const AchievementComponent = () => {
             </main>
         </div>
     );
+
 };
 
 export default AchievementComponent;
