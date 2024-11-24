@@ -3,6 +3,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import google.generativeai as genai
 from dotenv import load_dotenv
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 # Load environment variables
 load_dotenv()
@@ -10,10 +12,13 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
-# Get the API key from environment variables
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address, # a built in function to get client IP
+    default_limits=["10 per minute"]
+)
+
 api_key = os.getenv("API_KEY")
-if not api_key:
-    raise ValueError("No API key found. Please set the API_KEY environment variable.")
 
 # Configure the API key for google.generativeai
 genai.configure(api_key=api_key)
@@ -53,7 +58,7 @@ GYM_KEYWORDS = [
 ]
 
 def is_gym_related(message):
-    """Check if the message contains any gym-related keywords."""
+    # Check if the message contains any gym-related keywords
     message_lower = message.lower()
     for keyword in GYM_KEYWORDS:
         if keyword in message_lower:
@@ -65,6 +70,7 @@ def home():
     return "Welcome to the Chatbot API"
 
 @app.route('/chat', methods=['POST'])
+@limiter.limit("10 per minute")
 def chat():
     try:
         user_message = request.json.get('message')
@@ -77,14 +83,19 @@ def chat():
                 "response": "The topic is irrelevant, I can only answer questions related to gym topics like nutrition and workout."
             }), 200
 
-        # Generate content using the google.generativeai library
+        # Generate from the model
         response = model.generate_content(user_message)
         chatbot_response = response.text
 
         return jsonify({"response": chatbot_response})
-    except Exception as e:
-        print(f"Error: {e}")
-        return jsonify({"error": str(e)}), 500
+    except Exception:
+        return jsonify({"error": "An error occurred"}), 500
+
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    return jsonify({
+        "response": "You are sending too many messages. Please wait a while before sending more."
+    })
 
 if __name__ == '__main__':
     app.run(debug=True)
