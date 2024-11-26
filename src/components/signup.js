@@ -3,7 +3,6 @@ import { FaEye, FaEyeSlash, FaGoogle, FaFacebook, FaGithub } from "react-icons/f
 import { Navigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { auth, googleProvider, facebookProvider, githubProvider } from './firebase';
-
 import '../index.css';
 
 const SignUpForm = () => {
@@ -16,12 +15,22 @@ const SignUpForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
+  const [generalError, setGeneralError] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  // create a new object to store the field labels
+  const fieldLabels = {
+    email: "Email",
+    phone: "Phone Number",
+    password: "Password",
+    confirmPassword: "Confirm Password"
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
     validateField(name, value);
+    setGeneralError("");
   };
 
   const validateField = (name, value) => {
@@ -50,7 +59,7 @@ const SignUpForm = () => {
         break;
       case "confirmPassword":
         if (!value) {
-          error = "Confirm password is required";
+          error = "Confirm Password is required";
         } else if (value !== formData.password) {
           error = "Passwords do not match";
         }
@@ -63,55 +72,62 @@ const SignUpForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
+    setGeneralError(""); 
     const formFields = ["email", "phone", "password", "confirmPassword"];
     const newErrors = {};
 
     formFields.forEach(field => {
       validateField(field, formData[field]);
       if (!formData[field]) {
-        newErrors[field] = `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
+        newErrors[field] = `${fieldLabels[field]} is required`;
       }
     });
 
-    if (Object.keys(newErrors).length === 0 && Object.values(errors).every(error => error === "")) {
-      // Sign up with Firebase
+    const hasNoErrors = Object.keys(newErrors).length === 0 &&
+      Object.values(errors).every(error => error === "");
+
+    if (hasNoErrors) {
       createUserWithEmailAndPassword(auth, formData.email, formData.password)
         .then((userCredential) => {
-          console.log("Form submitted", userCredential.user);
           setIsSubmitted(true);
         })
         .catch((error) => {
-          console.error("Error signing up:", error.message);
-          setErrors((prevErrors) => ({ ...prevErrors, email: error.message }));
+          let customErrorMessage = "";
+
+          switch (error.code) {
+            case 'auth/email-already-in-use':
+              customErrorMessage = "This email is already in use. Please use a different email.";
+              setErrors((prevErrors) => ({ ...prevErrors, email: customErrorMessage }));
+              break;
+            case 'auth/invalid-email':
+              customErrorMessage = "Invalid email address. Please check and try again.";
+              setErrors((prevErrors) => ({ ...prevErrors, email: customErrorMessage }));
+              break;
+            case 'auth/weak-password':
+              customErrorMessage = "Your password is too weak. Please choose a stronger password.";
+              setErrors((prevErrors) => ({ ...prevErrors, password: customErrorMessage }));
+              break;
+            default:
+              customErrorMessage = "An unexpected error occurred. Please try again.";
+              setGeneralError(customErrorMessage);
+              break;
+          }
         });
     } else {
       setErrors(newErrors);
     }
   };
 
-  // const googleProvider = new GoogleAuthProvider();
-  // const googleBtn = () => {
-  //   signInWithPopup(auth, googleProvider)
-  //   .then ((result) => {
-  //     const userInfo = result.user;
-  //     console.log(userInfo);
-  //   })
-  //   .catch(err => console.log(err));
-  // }
-
   const handleThirdPartySignUp = (provider) => {
     signInWithPopup(auth, provider)
       .then((result) => {
-        console.log(`Signed up with ${provider.providerId}`, result.user);
         setIsSubmitted(true);
       })
       .catch((error) => {
         if (error.code === 'auth/popup-closed-by-user') {
-          console.error('Popup closed by user');
+          setGeneralError("Sign-up was cancelled by the user.");
         } else {
-          console.error(`Error signing up with ${provider.providerId}:`, error.message);
-          setErrors((prevErrors) => ({ ...prevErrors, email: error.message }));
+          setGeneralError("An error occurred during third-party sign-up. Please try again.");
         }
       });
   };
@@ -123,8 +139,9 @@ const SignUpForm = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-300 to-sky-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
-      <h2 className="text-3xl font-bold text-center mb-6 text-sky-700">Sign Up</h2>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <h2 className="text-3xl font-bold text-center mb-6 text-sky-700">Sign Up</h2>
+        {generalError && <p className="mb-4 text-sm text-red-600 text-center">{generalError}</p>}
+        <form onSubmit={handleSubmit} className="space-y-6" noValidate>
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
               Email
@@ -135,9 +152,8 @@ const SignUpForm = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-base py-2 px-3"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-300 focus:ring focus:ring-sky-200 focus:ring-opacity-50 text-base py-2 px-3"
               placeholder="you@example.com"
-              required
             />
             {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
           </div>
@@ -151,9 +167,8 @@ const SignUpForm = () => {
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-base py-2 px-3"
-              placeholder="(123) 456-7890"
-              required
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-300 focus:ring focus:ring-sky-200 focus:ring-opacity-50 text-base py-2 px-3"
+              placeholder="1234567890"
             />
             {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
           </div>
@@ -168,8 +183,7 @@ const SignUpForm = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-base py-2 px-3"
-                required
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-300 focus:ring focus:ring-sky-200 focus:ring-opacity-50 text-base py-2 px-3"
               />
               <button
                 type="button"
@@ -192,8 +206,7 @@ const SignUpForm = () => {
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-base py-2 px-3"
-                required
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-sky-300 focus:ring focus:ring-sky-200 focus:ring-opacity-50 text-base py-2 px-3"
               />
               <button
                 type="button"
@@ -211,7 +224,12 @@ const SignUpForm = () => {
           >
             Sign Up
           </button>
-          <p className="mt-2 text-sm text-center text-gray-600">Already have an account? <a href="/login" className="text-sky-600 hover:underline">Log in</a></p>
+          <p className="mt-2 text-sm text-center text-gray-600">
+            Already have an account?{" "}
+            <a href="/login" className="text-sky-600 hover:underline">
+              Log in
+            </a>
+          </p>
         </form>
         <div className="mt-8">
           <div className="relative">
