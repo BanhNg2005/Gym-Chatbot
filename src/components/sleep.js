@@ -265,6 +265,10 @@ const SleepTracker = () => {
   };
 
   const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this sleep history?")) {
+      return;
+    }
+    
     if (!user) {
       toast.error("Please sign in to delete your sleep data.");
       return;
