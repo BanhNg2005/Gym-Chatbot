@@ -103,7 +103,7 @@ const ResetPasswordForm = () => {
         <h1 className="text-3xl font-bold text-center mb-6 text-sky-700">
           Reset Password
         </h1>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} noValidate className="space-y-4">
           <div className="relative">
             <FaLock className="absolute top-3 left-3 text-gray-400" />
             <input

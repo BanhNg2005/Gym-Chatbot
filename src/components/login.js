@@ -193,6 +193,7 @@ const LoginForm = () => {
               exit={{ opacity: 0, x: 50 }}
               transition={{ duration: 0.3 }}
               onSubmit={handleSubmit}
+              noValidate
               className="space-y-4"
             >
               <div className="relative">
@@ -266,6 +267,7 @@ const LoginForm = () => {
               exit={{ opacity: 0, x: -50 }}
               transition={{ duration: 0.3 }}
               onSubmit={handleResetPassword}
+              noValidate
               className="space-y-4"
             >
               <div className="relative">
