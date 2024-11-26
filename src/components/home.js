@@ -365,43 +365,43 @@ const HomePage = () => {
         <section className="mt-36 mb-12">
           <h2 className="text-3xl font-semibold mb-6 text-center">About Us</h2>
           <div className="flex min-h-screen items-center justify-center gap-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               <div className="group relative items-center justify-center overflow-hidden cursor-pointer hover-shadow-x1 hover:shadow-black/30 transition-shadow">
                 <div className="h-96 w-72">
-                  <img className="w-full h-full object-cover group-hover:rotate-3 group-hover:scale-125 transition-transform duration-500" src={require("./templates/about1.jpg")} alt="About 1" />
+                  <img className="w-full h-full object-cover group-hover:rotate-3 group-hover:scale-125 transition-transform duration-500" src={require("./templates/whorwe.jpg")} alt="About 1" />
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black group-hover:from-black/70 group-hover:via-black/60 group-hover:to-black/70"></div> {/* background overlay */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center px-9 text-center translate-y-[45%] group-hover:translate-y-0 transition-all duration-500">
+                <div className="absolute inset-0 flex flex-col items-center justify-center px-9 text-center translate-y-[57%] group-hover:translate-y-0 transition-all duration-500">
                   <h1 className="font-serif text-2xl font-bold text-white">Who Are We?</h1>
-                  <p className="text-lg italic text-white mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">This is just a text</p>
+                  <p className="text-lg italic text-white mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">We are a team of fitness enthusiasts who are passionate about helping you achieve your fitness goals.</p>
                 </div>
               </div>
               <div className="group relative items-center justify-center overflow-hidden cursor-pointer hover-shadow-x1 hover:shadow-black/30 transition-shadow">
                 <div className="h-96 w-72">
-                  <img className="w-full h-full object-cover group-hover:rotate-3 group-hover:scale-125 transition-transform duration-500" src={require("./templates/about1.jpg")} alt="About 1" />
+                  <img className="w-full h-full object-cover group-hover:rotate-3 group-hover:scale-125 transition-transform duration-500" src={require("./templates/Mission.jpg")} alt="About 1" />
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black group-hover:from-black/70 group-hover:via-black/60 group-hover:to-black/70"></div> {/* background overlay */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center px-9 text-center translate-y-[45%] group-hover:translate-y-0 transition-all duration-500">
+                <div className="absolute inset-0 flex flex-col items-center justify-center px-9 text-center translate-y-[60%] group-hover:translate-y-0 transition-all duration-500">
                   <h1 className="font-serif text-2xl font-bold text-white">Our Mission</h1>
-                  <p className="text-lg italic text-white mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">This is just a text</p>
+                  <p className="text-lg italic text-white mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">DREAMS Fitness is dedicated to helping you achieve your fitness goals through personalized workout plans, nutrition guidance, and lifestyle tips.</p>
                 </div>
               </div>
               <div className="group relative items-center justify-center overflow-hidden cursor-pointer hover-shadow-x1 hover:shadow-black/30 transition-shadow">
                 <div className="h-96 w-72">
-                  <img className="w-full h-full object-cover group-hover:rotate-3 group-hover:scale-125 transition-transform duration-500" src={require("./templates/about1.jpg")} alt="About 1" />
+                  <img className="w-full h-full object-cover group-hover:rotate-3 group-hover:scale-125 transition-transform duration-500" src={require("./templates/Founder.jpg")} alt="About 1" />
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black group-hover:from-black/70 group-hover:via-black/60 group-hover:to-black/70"></div> {/* background overlay */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center px-9 text-center translate-y-[45%] group-hover:translate-y-0 transition-all duration-500">
+                <div className="absolute inset-0 flex flex-col items-center justify-center px-9 text-center translate-y-[65%] group-hover:translate-y-0 transition-all duration-500">
                   <h1 className="font-serif text-2xl font-bold text-white">Behind The Scene</h1>
-                  <p className="text-lg italic text-white mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">This is just a text</p>
+                  <p className="text-lg italic text-white mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">"As a person who has struggled with going to the gym at first, I wanted to create a platform that makes fitness more accessible and enjoyable for everyone." -  Bao Anh (Founder)</p>
                 </div>
               </div>
               <div className="group relative items-center justify-center overflow-hidden cursor-pointer hover-shadow-x1 hover:shadow-black/30 transition-shadow">
                 <div className="h-96 w-72">
-                  <img className="w-full h-full object-cover group-hover:rotate-3 group-hover:scale-125 transition-transform duration-500" src={require("./templates/about1.jpg")} alt="About 1" />
+                  <img className="w-full h-full object-cover group-hover:rotate-3 group-hover:scale-125 transition-transform duration-500" src={require("./templates/Review.jpg")} alt="About 1" />
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black group-hover:from-black/70 group-hover:via-black/60 group-hover:to-black/70"></div> {/* background overlay */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center px-9 text-center translate-y-[45%] group-hover:translate-y-0 transition-all duration-500">
+                <div className="absolute inset-0 flex flex-col items-center justify-center px-9 text-center translate-y-[55%] group-hover:translate-y-0 transition-all duration-500">
                   <h1 className="font-serif text-2xl font-bold text-white">Reviews</h1>
                   <p className="text-lg italic text-white mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">"DREAMS Fitness has changed my life in my jounrey to a healthier, stronger, and more confident me!" - Jack Kieu</p>
                 </div>
