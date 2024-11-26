@@ -595,7 +595,7 @@ const Nutrition = () => {
               <FaUtensils className="text-2xl text-blue-500 mr-2" />
               <h2 className="text-2xl font-bold">Log Your Meal</h2>
             </div>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} noValidate>
               <div className="mb-4">
                 <label htmlFor="meal" className="block mb-2">
                   Meal/Snack:

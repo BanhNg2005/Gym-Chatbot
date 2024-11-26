@@ -545,7 +545,11 @@ const CreateWorkoutPlan = ({ onCreateWorkout, isDarkMode }) => {
     e.preventDefault();
     const newErrors = {};
     if (!workoutType) newErrors.workoutType = "Workout type is required";
-    if (!duration) newErrors.duration = "Duration is required";
+    if (!duration) {
+      newErrors.duration = "Duration is required";
+    } else if (isNaN(duration) || parseFloat(duration) <= 0) {
+      newErrors.duration = "Duration must be a positive number";
+    }
     if (muscleGroups.length === 0) newErrors.muscleGroups = "At least one muscle group must be selected";
 
     if (Object.keys(newErrors).length > 0) {
@@ -572,7 +576,7 @@ const CreateWorkoutPlan = ({ onCreateWorkout, isDarkMode }) => {
   return (
     <div className={`shadow-md rounded-lg p-6 ${isDarkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"}`}>
       <h2 className={`text-2xl font-semibold mb-4 ${isDarkMode ? 'text-white' : 'text-black'}`}>Create Workout Plan</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate>
         <div className="mb-4">
           <label className={`block text-sm font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-black'}`} htmlFor="workoutType">
             Workout Type

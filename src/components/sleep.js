@@ -228,6 +228,8 @@ const SleepTracker = () => {
       newErrors.sleepDuration = "Sleep duration is required";
     } else if (isNaN(sleepDuration) || parseFloat(sleepDuration) <= 0) {
       newErrors.sleepDuration = "Duration must be a positive number";
+    } else if (parseFloat(sleepDuration) > 24) {
+      newErrors.sleepDuration = "Sleep duration cannot exceed 24 hours";
     }
 
     if (!sleepQuality) {
@@ -268,7 +270,7 @@ const SleepTracker = () => {
     if (!window.confirm("Are you sure you want to delete this sleep history?")) {
       return;
     }
-    
+
     if (!user) {
       toast.error("Please sign in to delete your sleep data.");
       return;
@@ -659,7 +661,7 @@ const SleepTracker = () => {
               <FaBed className="text-2xl text-blue-500" />
               <h2 className="text-xl font-semibold">Sleep Tracking</h2>
             </div>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} noValidate className="space-y-4">
               <div>
                 <label htmlFor="sleepDuration" className="block mb-1">
                   Sleep Duration (hours)
