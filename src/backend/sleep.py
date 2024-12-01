@@ -70,3 +70,6 @@ def delete_sleep(id):
         return jsonify({"success": True}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+    
+if __name__ == '__main__':
+    app.run(debug=True)
