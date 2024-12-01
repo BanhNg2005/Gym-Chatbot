@@ -54,7 +54,7 @@ GYM_KEYWORDS = [
     'dosage', 'instructions', 'how to', 'tips', 'tricks', 'hacks',
     'myths', 'facts', 'research', 'studies', 'science', 'evidence',
     'expert', 'professional', 'coach', 'trainer', 'doctor', 'physician',
-    'quote', 'motivation', 'inspiration', 'success', 'progress'
+    'quote', 'motivation', 'inspiration', 'success', 'progress', 'friendly', 'professional',
 ]
 
 def is_gym_related(message):
