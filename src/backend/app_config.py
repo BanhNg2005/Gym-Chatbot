@@ -1,0 +1,15 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+class AppConfig:
+    JWT_EXPIRATION = 86400
+    TOKEN_SECRET = "DREAMS"
+
+    FIREBASE_SERVICE_ACCOUNT = os.getenv("FIREBASE_SERVICE_ACCOUNT")
+    REACT_APP_PROJECT_ID = os.getenv("REACT_APP_PROJECT_ID")
+    REACT_APP_STORAGE_BUCKET = os.getenv("REACT_APP_STORAGE_BUCKET")
+    REACT_APP_MESSAGING_SENDER_ID = os.getenv("REACT_APP_MESSAGING_SENDER_ID")
+    REACT_APP_APP_ID = os.getenv("REACT_APP_APP_ID")
+    REACT_APP_MEASUREMENT_ID = os.getenv("REACT_APP_MEASUREMENT_ID")
